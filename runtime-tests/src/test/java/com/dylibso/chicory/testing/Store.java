@@ -5,7 +5,7 @@ import com.dylibso.chicory.wasm.Module;
 import com.dylibso.chicory.wasm.types.Export;
 import com.dylibso.chicory.wasm.types.ExportSection;
 import com.dylibso.chicory.wasm.types.FunctionType;
-
+import com.dylibso.chicory.wasm.types.MutabilityType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +16,7 @@ public class Store {
     private List<HostMemory> memories;
     private List<HostTable> tables;
 
-    Store() {
-    }
+    Store() {}
 
     public Store withFunctions(List<HostFunction> functions) {
         this.functions = functions;
@@ -77,12 +76,8 @@ public class Store {
                         functions == null
                                 ? new HostFunction[0]
                                 : functions.toArray(new HostFunction[0]),
-                        globals == null
-                                ? new HostGlobal[0]
-                                : globals.toArray(new HostGlobal[0]),
-                        memories == null
-                                ? new HostMemory[0]
-                                : memories.toArray(new HostMemory[0]),
+                        globals == null ? new HostGlobal[0] : globals.toArray(new HostGlobal[0]),
+                        memories == null ? new HostMemory[0] : memories.toArray(new HostMemory[0]),
                         tables == null ? new HostTable[0] : tables.toArray(new HostTable[0]));
         return hostImports;
     }
@@ -100,21 +95,33 @@ public class Store {
                     FunctionType ftype = instance.exportType(exportName);
                     this.addFunction(
                             new HostFunction(
-                                    (inst, args) -> f.apply(args), name, exportName, ftype.params(), ftype.returns()));
+                                    (inst, args) -> f.apply(args),
+                                    name,
+                                    exportName,
+                                    ftype.params(),
+                                    ftype.returns()));
+                    break;
 
                 case TABLE:
                     this.addTable(new HostTable(name, exportName, instance.table(export.index())));
+                    break;
 
                 case MEMORY:
                     this.addMemory(new HostMemory(name, exportName, instance.memory()));
+                    break;
 
                 case GLOBAL:
-                    this.addGlobal(new HostGlobal(name, exportName, instance.global(export.index())));
-
+                    GlobalInstance g = instance.global(export.index());
+                    MutabilityType mtype =
+                            exportName.contains("mut") || exportName.contains("var")
+                                    ? // FIXME temporary hack
+                                    MutabilityType.Var
+                                    : MutabilityType.Const;
+                    this.addGlobal(new HostGlobal(name, exportName, g, mtype));
+                    break;
             }
         }
 
         return instance;
     }
-
 }

@@ -13,23 +13,25 @@ import java.util.List;
 public class SpecV1LinkingHostFuncs {
 
     public static HostImports.Builder hostImportBuilder =
-            HostImports.builder().addFunction(
-                    new HostFunction(
-                            (Instance instance, Value... args) -> {
-                                return null;
-                            },
-                            "spectest",
-                            "print_i32",
-                            List.of(ValueType.I32),
-                            List.of()));
+            HostImports.builder()
+                    .addFunction(
+                            new HostFunction(
+                                    (Instance instance, Value... args) -> {
+                                        return null;
+                                    },
+                                    "spectest",
+                                    "print_i32",
+                                    List.of(ValueType.I32),
+                                    List.of()));
 
     public static HostImports Mf() {
-        hostImportBuilder.addFunction(new HostFunction(
-                (Instance instance, Value... args) -> new Value[] {Value.i32(2)},
-                "Mf",
-                "call",
-                List.of(),
-                List.of(ValueType.I32)));
+        hostImportBuilder.addFunction(
+                new HostFunction(
+                        (Instance instance, Value... args) -> new Value[] {Value.i32(2)},
+                        "Mf",
+                        "call",
+                        List.of(),
+                        List.of(ValueType.I32)));
         return hostImportBuilder.build();
     }
 
@@ -47,22 +49,25 @@ public class SpecV1LinkingHostFuncs {
 
     public static HostImports Nt() {
         return hostImportBuilder
-                .addFunction(new HostFunction(
-                        (Instance instance, Value... args) -> {
-                            return MtInstance.export("call").apply(args);
-                        },
-                        "Mt",
-                        "call",
-                        List.of(ValueType.I32),
-                        List.of(ValueType.I32)))
-                .addFunction(new HostFunction(
-                        (Instance instance1, Value... args1) -> {
-                            return MtInstance.export("h").apply(args1);
-                        },
-                        "Mt",
-                        "h",
-                        List.of(),
-                        List.of(ValueType.I32))).build();
+                .addFunction(
+                        new HostFunction(
+                                (Instance instance, Value... args) -> {
+                                    return MtInstance.export("call").apply(args);
+                                },
+                                "Mt",
+                                "call",
+                                List.of(ValueType.I32),
+                                List.of(ValueType.I32)))
+                .addFunction(
+                        new HostFunction(
+                                (Instance instance1, Value... args1) -> {
+                                    return MtInstance.export("h").apply(args1);
+                                },
+                                "Mt",
+                                "h",
+                                List.of(),
+                                List.of(ValueType.I32)))
+                .build();
     }
 
     public static HostImports Ng() {
@@ -103,8 +108,9 @@ public class SpecV1LinkingHostFuncs {
 
     public static HostImports Ot() {
         return hostImportBuilder
-                //.addFunction(Mth()) // already added earlier as a side-effect
-                .addTable(MtTab()).build();
+                // .addFunction(Mth()) // already added earlier as a side-effect
+                .addTable(MtTab())
+                .build();
     }
 
     public static HostImports testModule10() {
@@ -119,7 +125,8 @@ public class SpecV1LinkingHostFuncs {
 
     public static HostImports Mm() {
         return hostImportBuilder
-//                .addMemory(new HostMemory("Mm", "mem", new Memory(new MemoryLimits(1, 5)))) // FIXME this does not work correctly
+                //                .addMemory(new HostMemory("Mm", "mem", new Memory(new
+                // MemoryLimits(1, 5)))) // FIXME this does not work correctly
                 .addFunction(
                         new HostFunction(
                                 (Instance instance, Value... args) -> {
@@ -144,7 +151,6 @@ public class SpecV1LinkingHostFuncs {
         return hostImportBuilder.build();
     }
 
-
     public static HostImports Nm() {
         return hostImportBuilder
                 // FIXME: this should be registered upon instantiation of Mm
@@ -153,8 +159,7 @@ public class SpecV1LinkingHostFuncs {
     }
 
     public static HostImports Ms() {
-        return hostImportBuilder
-                .build();
+        return hostImportBuilder.build();
     }
 
     public static HostImports Mref_im() {
@@ -217,14 +222,10 @@ public class SpecV1LinkingHostFuncs {
                 hostImportBuilder
                         .addMemory(new HostMemory("Ms", "memory", MsInstance.memory()))
                         .addTable(new HostTable("Ms", "table", MsInstance.table(0)));
-
-
         }
 
         ++STATE;
 
-
         return hostImportBuilder.build();
-
     }
 }

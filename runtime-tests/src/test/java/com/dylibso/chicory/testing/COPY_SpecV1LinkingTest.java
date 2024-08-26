@@ -1,21 +1,34 @@
 package com.dylibso.chicory.testing;
 
-import com.dylibso.chicory.imports.SpecV1LinkingHostFuncs;
 import com.dylibso.chicory.runtime.ExportFunction;
+import com.dylibso.chicory.runtime.HostFunction;
 import com.dylibso.chicory.runtime.Instance;
 import com.dylibso.chicory.wasm.exceptions.ChicoryException;
 import com.dylibso.chicory.wasm.exceptions.UninstantiableException;
 import com.dylibso.chicory.wasm.exceptions.UnlinkableException;
 import com.dylibso.chicory.wasm.types.Value;
+import com.dylibso.chicory.wasm.types.ValueType;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class COPY_SpecV1LinkingTest {
+
+    public static Store store = new Store().addFunction(
+                    new HostFunction(
+                            (Instance instance, Value... args) -> {
+                                return null;
+                            },
+                            "spectest",
+                            "print_i32",
+                            List.of(ValueType.I32),
+                            List.of()));
+
 
     public static Instance MfInstance = null;
 
@@ -24,8 +37,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_MfInstance() {
         MfInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.0.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Mf())
-          .build();
+          .instantiate(store, "Mf");
     }
 
     public static Instance NfInstance = null;
@@ -35,8 +47,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_NfInstance() {
         NfInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.1.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Nf())
-          .build();
+          .instantiate(store, "Nf");
     }
 
     @Test()
@@ -78,8 +89,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_testModule2Instance() {
         testModule2Instance = TestModule.of(
             new File("target/compiled-wast/linking/spec.2.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build();
+          .instantiate(store, "reexport_f");
     }
 
     @Test()
@@ -87,8 +97,7 @@ public class COPY_SpecV1LinkingTest {
     public void test7() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.3.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+          .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -97,8 +106,7 @@ public class COPY_SpecV1LinkingTest {
     public void test8() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.4.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -109,8 +117,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_MgInstance() {
         MgInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.5.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Mg())
-          .build();
+                .instantiate(store, "Mg");
     }
 
     public static Instance NgInstance = null;
@@ -120,8 +127,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_NgInstance() {
         NgInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.6.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Ng())
-          .build();
+                .instantiate(store, "Ng");
     }
 
     @Test()
@@ -248,8 +254,7 @@ public class COPY_SpecV1LinkingTest {
     public void test26() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.7.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+          .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -258,8 +263,7 @@ public class COPY_SpecV1LinkingTest {
     public void test27() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.8.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -270,8 +274,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_Mref_exInstance() {
         Mref_exInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.9.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build();
+               .instantiate(store, "Mref_ex");
     }
 
     public static Instance Mref_imInstance = null;
@@ -281,8 +284,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_Mref_imInstance() {
         Mref_imInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.10.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Mref_im())
-          .build();
+                .instantiate(store, "Mref_im");
     }
 
     @Test()
@@ -290,8 +292,7 @@ public class COPY_SpecV1LinkingTest {
     public void test30() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.11.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -300,8 +301,7 @@ public class COPY_SpecV1LinkingTest {
     public void test31() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.12.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -310,8 +310,7 @@ public class COPY_SpecV1LinkingTest {
     public void test32() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.13.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -320,8 +319,7 @@ public class COPY_SpecV1LinkingTest {
     public void test33() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.14.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -332,8 +330,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_MtInstance() {
         MtInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.15.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Mt())
-          .build();
+                .instantiate(store, "Mt");
     }
 
     public static Instance NtInstance = null;
@@ -343,8 +340,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_NtInstance() {
         NtInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.16.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Nt())
-          .build();
+                .instantiate(store, "Nt");
     }
 
     @Test()
@@ -498,8 +494,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_OtInstance() {
         OtInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.17.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Ot())
-          .build();
+                .instantiate(store, "Ot");
     }
 
     @Test()
@@ -669,8 +664,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_testModule10Instance() {
         testModule10Instance = TestModule.of(
             new File("target/compiled-wast/linking/spec.18.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.testModule10())
-          .build();
+                .instantiate(store, "__ignore");
     }
 
     public static Instance G1Instance = null;
@@ -680,8 +674,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_G1Instance() {
         G1Instance = TestModule.of(
             new File("target/compiled-wast/linking/spec.19.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build();
+                .instantiate(store, "G1");
     }
 
     public static Instance G2Instance = null;
@@ -691,8 +684,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_G2Instance() {
         G2Instance = TestModule.of(
             new File("target/compiled-wast/linking/spec.20.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.G2())
-          .build();
+                .instantiate(store, "G2");
     }
 
     @Test()
@@ -708,8 +700,7 @@ public class COPY_SpecV1LinkingTest {
     public void test79() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.21.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
@@ -718,8 +709,7 @@ public class COPY_SpecV1LinkingTest {
     public void test80() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.22.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("unknown import"), "'" + exception.getMessage() + "' doesn't contains: 'unknown import");
     }
 
@@ -736,8 +726,7 @@ public class COPY_SpecV1LinkingTest {
     public void test82() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.23.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
@@ -762,8 +751,7 @@ public class COPY_SpecV1LinkingTest {
     public void test85() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.24.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
@@ -782,8 +770,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_Mtable_exInstance() {
         Mtable_exInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.25.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build();
+                .instantiate(store, "Mtable_ex");
     }
 
     public static Instance testModule14Instance = null;
@@ -793,8 +780,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_testModule14Instance() {
         testModule14Instance = TestModule.of(
             new File("target/compiled-wast/linking/spec.26.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build();
+                .instantiate(store, "__ignore");
     }
 
     @Test()
@@ -802,8 +788,7 @@ public class COPY_SpecV1LinkingTest {
     public void test89() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.27.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -812,8 +797,7 @@ public class COPY_SpecV1LinkingTest {
     public void test90() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.28.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -824,8 +808,8 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_MmInstance() {
         MmInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.29.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Mm())
-          .build();
+                .instantiate(store, "Mm");
+
     }
 
     public static Instance NmInstance = null;
@@ -835,8 +819,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_NmInstance() {
         NmInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.30.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Nm())
-          .build();
+                .instantiate(store, "Nm");
     }
 
     @Test()
@@ -870,8 +853,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_OmInstance() {
         OmInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.31.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Om())
-          .build();
+                .instantiate(store, "Om");
     }
 
     @Test()
@@ -913,8 +895,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_testModule18Instance() {
         testModule18Instance = TestModule.of(
             new File("target/compiled-wast/linking/spec.32.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.testModule18())
-          .build();
+                .instantiate(store, "_ignore");
     }
 
     @Test()
@@ -922,8 +903,7 @@ public class COPY_SpecV1LinkingTest {
     public void test102() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.33.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
@@ -934,8 +914,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_PmInstance() {
         PmInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.34.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Pm())
-          .build();
+                .instantiate(store, "Pm");
     }
 
     @Test()
@@ -1007,8 +986,7 @@ public class COPY_SpecV1LinkingTest {
     public void test112() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.35.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("unknown import"), "'" + exception.getMessage() + "' doesn't contains: 'unknown import");
     }
 
@@ -1025,8 +1003,7 @@ public class COPY_SpecV1LinkingTest {
     public void test114() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.36.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
@@ -1051,8 +1028,7 @@ public class COPY_SpecV1LinkingTest {
     public void test117() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.37.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
@@ -1071,8 +1047,7 @@ public class COPY_SpecV1LinkingTest {
     public void instantiate_MsInstance() {
         MsInstance = TestModule.of(
             new File("target/compiled-wast/linking/spec.38.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.Ms())
-          .build();
+                .instantiate(store, "Ms");
     }
 
     @Test()
@@ -1080,8 +1055,7 @@ public class COPY_SpecV1LinkingTest {
     public void test120() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.39.wasm"))
-          .withHostImports(SpecV1LinkingHostFuncs.fallback())
-          .build());
+                .instantiate(store, "failure"));
         assertTrue(exception.getMessage().contains("unreachable"), "'" + exception.getMessage() + "' doesn't contains: 'unreachable");
     }
 
