@@ -25,6 +25,17 @@ import java.util.List;
 
 public class SpecV1LinkingHostFuncs {
 
+    public static HostImports.Builder hostImportBuilder =
+            HostImports.builder().addFunction(
+                    new HostFunction(
+                            (Instance instance, Value... args) -> {
+                                return null;
+                            },
+                            "spectest",
+                            "print_i32",
+                            List.of(ValueType.I32),
+                            List.of()));
+
     private static HostFunction MfCall =
             new HostFunction(
                     (Instance instance, Value... args) -> new Value[] {Value.i32(2)},
@@ -34,19 +45,20 @@ public class SpecV1LinkingHostFuncs {
                     List.of(ValueType.I32));
 
     public static HostImports Mf() {
-        return new HostImports(new HostFunction[] {MfCall});
+        hostImportBuilder.addFunction(MfCall);
+        return hostImportBuilder.build();
     }
 
     public static HostImports Nf() {
-        return new HostImports(new HostFunction[] {MfCall});
+        return hostImportBuilder.build();
     }
 
     public static HostImports Mg() {
-        return HostImports.empty();
+        return hostImportBuilder.build();
     }
 
     public static HostImports Mt() {
-        return HostImports.empty();
+        return hostImportBuilder.build();
     }
 
     private static HostFunction Mth() {
@@ -72,11 +84,13 @@ public class SpecV1LinkingHostFuncs {
     }
 
     public static HostImports Nt() {
-        return new HostImports(new HostFunction[] {Mtcall(), Mth()});
+        return hostImportBuilder
+                .addFunction(Mtcall())
+                .addFunction(Mth()).build();
     }
 
     public static HostImports Ng() {
-        return HostImports.builder()
+        return hostImportBuilder
                 .addFunction(
                         new HostFunction(
                                 (Instance instance, Value... args) ->
@@ -112,55 +126,58 @@ public class SpecV1LinkingHostFuncs {
     }
 
     public static HostImports Ot() {
-        return HostImports.builder().addFunction(Mth()).addTable(MtTab()).build();
+        return hostImportBuilder
+                //.addFunction(Mth()) // already added earlier as a side-effect
+                .addTable(MtTab()).build();
     }
 
     public static HostImports testModule10() {
-        return HostImports.builder().addTable(MtTab()).build();
+        return hostImportBuilder.addTable(MtTab()).build();
     }
 
     public static HostImports G2() {
-        return HostImports.builder()
+        return hostImportBuilder
                 .addGlobal(new HostGlobal("G1", "g", new GlobalInstance(Value.i32(5))))
                 .build();
     }
 
-    private static HostMemory MmMem() {
-        return new HostMemory("Mm", "mem", MmInstance.memory());
+    public static HostImports Mm() {
+        return hostImportBuilder
+//                .addMemory(new HostMemory("Mm", "mem", new Memory(new MemoryLimits(1, 5)))) // FIXME this does not work correctly
+                .addFunction(
+                        new HostFunction(
+                                (Instance instance, Value... args) -> {
+                                    return MmInstance.export("load").apply(args);
+                                },
+                                "Mm",
+                                "load",
+                                List.of(ValueType.I32),
+                                List.of(ValueType.I32)))
+                .build();
     }
 
     public static HostImports Om() {
-        return new HostImports(new HostMemory[] {MmMem()});
+        return hostImportBuilder.build();
     }
 
     public static HostImports testModule18() {
-        return new HostImports(new HostMemory[] {MmMem()});
+        return hostImportBuilder.build();
     }
 
     public static HostImports Pm() {
-        return new HostImports(new HostMemory[] {MmMem()});
+        return hostImportBuilder.build();
     }
+
 
     public static HostImports Nm() {
-        return new HostImports(
-                new HostFunction[] {
-                    new HostFunction(
-                            (Instance instance, Value... args) -> {
-                                return MmInstance.export("load").apply(args);
-                            },
-                            "Mm",
-                            "load",
-                            List.of(ValueType.I32),
-                            List.of(ValueType.I32))
-                });
-    }
-
-    public static HostImports Mm() {
-        return new HostImports(new HostMemory("Mm", "mem", new Memory(new MemoryLimits(1, 5))));
+        return hostImportBuilder
+                // FIXME: this should be registered upon instantiation of Mm
+                .addMemory(new HostMemory("Mm", "mem", MmInstance.memory()))
+                .build();
     }
 
     public static HostImports Ms() {
-        return HostImports.builder()
+        return hostImportBuilder
                 .addMemory(new HostMemory("Ms", "memory", new Memory(new MemoryLimits(1, 5))))
                 .addTable(
                         new HostTable(
@@ -171,7 +188,7 @@ public class SpecV1LinkingHostFuncs {
     }
 
     public static HostImports Mref_im() {
-        return HostImports.builder()
+        return hostImportBuilder
                 .addGlobal(
                         new HostGlobal(
                                 "Mref_ex", "g-const-func", new GlobalInstance(Value.funcRef(0))))
@@ -195,48 +212,24 @@ public class SpecV1LinkingHostFuncs {
                 .build();
     }
 
+    static int STATE = 0;
+
     public static HostImports fallback() {
-        var builder =
-                HostImports.builder()
-                        .addFunction(
-                                new HostFunction(
-                                        (Instance instance, Value... args) -> {
-                                            return null;
-                                        },
-                                        "spectest",
-                                        "print_i32",
-                                        List.of(ValueType.I32),
-                                        List.of()),
-                                new HostFunction(
-                                        (Instance instance, Value... args) -> {
-                                            return null;
-                                        },
-                                        "reexport_f",
-                                        "print",
-                                        List.of(),
-                                        List.of()))
-                        .addGlobal(
-                                new HostGlobal(
-                                        "Mref_ex",
-                                        "g-const-func",
-                                        new GlobalInstance(Value.funcRef(0))))
-                        .addGlobal(
-                                new HostGlobal(
-                                        "Mref_ex",
-                                        "g-const-extern",
-                                        new GlobalInstance(Value.externRef(0))))
-                        .addGlobal(
-                                new HostGlobal(
-                                        "Mref_ex",
-                                        "g-var-func",
-                                        new GlobalInstance(Value.funcRef(0)),
-                                        MutabilityType.Var))
-                        .addGlobal(
-                                new HostGlobal(
-                                        "Mref_ex",
-                                        "g-var-extern",
-                                        new GlobalInstance(Value.externRef(0)),
-                                        MutabilityType.Var))
+        switch (STATE) {
+            case 1:
+                hostImportBuilder.addFunction(
+                        new HostFunction(
+                                (Instance instance, Value... args) -> {
+                                    return null;
+                                },
+                                "reexport_f",
+                                "print",
+                                List.of(),
+                                List.of()));
+
+                break;
+            case 3:
+                hostImportBuilder
                         .addTable(
                                 new HostTable(
                                         "Mtable_ex",
@@ -249,24 +242,92 @@ public class SpecV1LinkingHostFuncs {
                                         "t-extern",
                                         new TableInstance(
                                                 new Table(ValueType.ExternRef, new Limits(1)))));
+                break;
+            case 23:
+                hostImportBuilder
+                        .addMemory(new HostMemory("Ms", "memory", MsInstance.memory()))
+                        .addTable(new HostTable("Ms", "table", MsInstance.table(0)));
 
-        if (MgInstance != null) {
-            builder.addGlobal(
-                    new HostGlobal("Mg", "glob", MgInstance.global(0)),
-                    new HostGlobal("Mg", "mut_glob", MgInstance.global(1), MutabilityType.Var));
-        }
+//                throw new UnsupportedOperationException("oh no 23");
 
-        if (MsInstance != null) {
-            builder.addMemory(new HostMemory("Ms", "memory", MsInstance.memory()))
-                    .addTable(new HostTable("Ms", "table", MsInstance.table(0)));
-        }
-        if (MmInstance != null) {
-            builder.addMemory(MmMem());
-        }
-        if (MtInstance != null) {
-            builder.addTable(new HostTable("Mt", "tab", MtInstance.table(0)));
         }
 
-        return builder.build();
+        ++STATE;
+
+
+        return hostImportBuilder.build();
+
+//        var builder =
+//                HostImports.builder()
+//                        .addFunction(
+//                                new HostFunction(
+//                                        (Instance instance, Value... args) -> {
+//                                            return null;
+//                                        },
+//                                        "spectest",
+//                                        "print_i32",
+//                                        List.of(ValueType.I32),
+//                                        List.of()),
+//                                new HostFunction(
+//                                        (Instance instance, Value... args) -> {
+//                                            return null;
+//                                        },
+//                                        "reexport_f",
+//                                        "print",
+//                                        List.of(),
+//                                        List.of()))
+//                        .addGlobal(
+//                                new HostGlobal(
+//                                        "Mref_ex",
+//                                        "g-const-func",
+//                                        new GlobalInstance(Value.funcRef(0))))
+//                        .addGlobal(
+//                                new HostGlobal(
+//                                        "Mref_ex",
+//                                        "g-const-extern",
+//                                        new GlobalInstance(Value.externRef(0))))
+//                        .addGlobal(
+//                                new HostGlobal(
+//                                        "Mref_ex",
+//                                        "g-var-func",
+//                                        new GlobalInstance(Value.funcRef(0)),
+//                                        MutabilityType.Var))
+//                        .addGlobal(
+//                                new HostGlobal(
+//                                        "Mref_ex",
+//                                        "g-var-extern",
+//                                        new GlobalInstance(Value.externRef(0)),
+//                                        MutabilityType.Var))
+//                        .addTable(
+//                                new HostTable(
+//                                        "Mtable_ex",
+//                                        "t-func",
+//                                        new TableInstance(
+//                                                new Table(ValueType.FuncRef, new Limits(1)))))
+//                        .addTable(
+//                                new HostTable(
+//                                        "Mtable_ex",
+//                                        "t-extern",
+//                                        new TableInstance(
+//                                                new Table(ValueType.ExternRef, new Limits(1)))));
+//
+//        if (MgInstance != null) {
+//            builder.addGlobal(
+//                    new HostGlobal("Mg", "glob", MgInstance.global(0)),
+//                    new HostGlobal("Mg", "mut_glob", MgInstance.global(1), MutabilityType.Var));
+//        }
+//
+//        if (MsInstance != null) {
+//            builder.addMemory(new HostMemory("Ms", "memory", MsInstance.memory()))
+//                    .addTable(new HostTable("Ms", "table", MsInstance.table(0)));
+//        }
+//        if (MmInstance != null) {
+//            builder.addMemory(MmMem());
+//        }
+//        if (MtInstance != null) {
+//            builder.addTable(new HostTable("Mt", "tab", MtInstance.table(0)));
+//        }
+//
+//        return builder.build();
     }
 }
