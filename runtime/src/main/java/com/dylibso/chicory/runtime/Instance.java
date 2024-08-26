@@ -695,20 +695,21 @@ public class Instance {
             Element[] elements = module.elementSection().elements();
 
             Memory memory = null;
-            if (module.memorySection().isPresent()) {
-                var memories = module.memorySection().get();
-                if (memories.memoryCount() > 0) {
-                    memory = new Memory(memories.getMemory(0).memoryLimits());
+
+            if (mappedHostImports.memoryCount() > 0) {
+                if (mappedHostImports.memory(0) == null
+                        || mappedHostImports.memory(0).memory() == null) {
+                    throw new InvalidException(
+                            "unknown memory, imported memory not defined, cannot run the"
+                                    + " program");
                 }
+                memory = mappedHostImports.memory(0).memory();
             } else {
-                if (mappedHostImports.memoryCount() > 0) {
-                    if (mappedHostImports.memory(0) == null
-                            || mappedHostImports.memory(0).memory() == null) {
-                        throw new InvalidException(
-                                "unknown memory, imported memory not defined, cannot run the"
-                                        + " program");
+                if (module.memorySection().isPresent()) {
+                    var memories = module.memorySection().get();
+                    if (memories.memoryCount() > 0) {
+                        memory = new Memory(memories.getMemory(0).memoryLimits());
                     }
-                    memory = mappedHostImports.memory(0).memory();
                 } else {
                     // No memory defined
                 }

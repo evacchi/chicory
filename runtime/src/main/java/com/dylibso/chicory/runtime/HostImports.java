@@ -133,7 +133,7 @@ public class HostImports {
     }
 
     public static final class Builder {
-        public List<HostFunction> functions;
+        private List<HostFunction> functions;
         private List<HostGlobal> globals;
         private List<HostMemory> memories;
         private List<HostTable> tables;
