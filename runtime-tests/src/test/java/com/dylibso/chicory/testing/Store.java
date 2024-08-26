@@ -2,10 +2,8 @@ package com.dylibso.chicory.testing;
 
 import com.dylibso.chicory.runtime.*;
 import com.dylibso.chicory.wasm.Module;
-import com.dylibso.chicory.wasm.types.Export;
-import com.dylibso.chicory.wasm.types.ExportSection;
-import com.dylibso.chicory.wasm.types.FunctionType;
-import com.dylibso.chicory.wasm.types.MutabilityType;
+import com.dylibso.chicory.wasm.types.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -85,6 +83,7 @@ public class Store {
     public Instance instantiate(String name, Module m) {
         HostImports hostImports = toHostImports();
         Instance instance = Instance.builder(m).withHostImports(hostImports).build();
+
         ExportSection exportSection = m.exportSection();
         for (int i = 0; i < exportSection.exportCount(); i++) {
             Export export = exportSection.getExport(i);
@@ -111,10 +110,11 @@ public class Store {
                     break;
 
                 case GLOBAL:
+//                    Global global = m.globalSection().getGlobal(export.index());
                     GlobalInstance g = instance.global(export.index());
                     MutabilityType mtype =
-                            exportName.contains("mut") || exportName.contains("var")
-                                    ? // FIXME temporary hack
+                            exportName.contains("mut") || exportName.contains("var")  // FIXME temporary hack
+                                    ?
                                     MutabilityType.Var
                                     : MutabilityType.Const;
                     this.addGlobal(new HostGlobal(name, exportName, g, mtype));

@@ -97,7 +97,7 @@ public class COPY_SpecV1LinkingTest {
     public void test7() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.3.wasm"))
-          .instantiate(store, "failure"));
+          .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -106,7 +106,7 @@ public class COPY_SpecV1LinkingTest {
     public void test8() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.4.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -254,7 +254,7 @@ public class COPY_SpecV1LinkingTest {
     public void test26() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.7.wasm"))
-          .instantiate(store, "failure"));
+          .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -263,7 +263,7 @@ public class COPY_SpecV1LinkingTest {
     public void test27() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.8.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -292,7 +292,7 @@ public class COPY_SpecV1LinkingTest {
     public void test30() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.11.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -301,7 +301,7 @@ public class COPY_SpecV1LinkingTest {
     public void test31() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.12.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -310,7 +310,7 @@ public class COPY_SpecV1LinkingTest {
     public void test32() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.13.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -319,7 +319,7 @@ public class COPY_SpecV1LinkingTest {
     public void test33() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.14.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -700,7 +700,7 @@ public class COPY_SpecV1LinkingTest {
     public void test79() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.21.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
@@ -709,7 +709,7 @@ public class COPY_SpecV1LinkingTest {
     public void test80() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.22.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("unknown import"), "'" + exception.getMessage() + "' doesn't contains: 'unknown import");
     }
 
@@ -726,7 +726,7 @@ public class COPY_SpecV1LinkingTest {
     public void test82() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.23.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
@@ -751,7 +751,7 @@ public class COPY_SpecV1LinkingTest {
     public void test85() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.24.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
@@ -788,7 +788,7 @@ public class COPY_SpecV1LinkingTest {
     public void test89() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.27.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -797,7 +797,7 @@ public class COPY_SpecV1LinkingTest {
     public void test90() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.28.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
@@ -903,7 +903,7 @@ public class COPY_SpecV1LinkingTest {
     public void test102() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.33.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
@@ -986,7 +986,7 @@ public class COPY_SpecV1LinkingTest {
     public void test112() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.35.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("unknown import"), "'" + exception.getMessage() + "' doesn't contains: 'unknown import");
     }
 
@@ -1003,7 +1003,7 @@ public class COPY_SpecV1LinkingTest {
     public void test114() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.36.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
@@ -1028,7 +1028,7 @@ public class COPY_SpecV1LinkingTest {
     public void test117() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.37.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
@@ -1055,7 +1055,7 @@ public class COPY_SpecV1LinkingTest {
     public void test120() {
         var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
             new File("target/compiled-wast/linking/spec.39.wasm"))
-                .instantiate(store, "failure"));
+                .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("unreachable"), "'" + exception.getMessage() + "' doesn't contains: 'unreachable");
     }
 
