@@ -6,8 +6,6 @@ import static com.dylibso.chicory.testing.COPY_SpecV1LinkingTest.MsInstance;
 import static com.dylibso.chicory.testing.COPY_SpecV1LinkingTest.MtInstance;
 
 import com.dylibso.chicory.runtime.*;
-import com.dylibso.chicory.runtime.Memory;
-import com.dylibso.chicory.test.gen.SpecV1LinkingTest;
 import com.dylibso.chicory.wasm.types.*;
 
 import java.util.List;
