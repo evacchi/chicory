@@ -523,7 +523,7 @@ public class COPY_SpecV1ImportsTest {
     public static Instance testModule11Instance = null;
 
     @Test()
-    @Order(40) // FIXME
+    @Order(40)
     public void instantiate_testModule11Instance() {
         testModule11Instance = TestModule.of(
             new File("target/compiled-wast/imports/spec.36.wasm"))

@@ -53,10 +53,10 @@ public class Spectest  {
                             List.of())
                 },
                 new HostGlobal[] {
-                    new HostGlobal("spectest", "global_i32", new GlobalInstance(Value.i32(0))),
-                    new HostGlobal("spectest", "global_i64", new GlobalInstance(Value.i64(0))),
-                    new HostGlobal("spectest", "global_f32", new GlobalInstance(Value.f32(0))),
-                    new HostGlobal("spectest", "global_f64", new GlobalInstance(Value.f64(0))),
+                    new HostGlobal("spectest", "global_i32", new GlobalInstance(Value.i32(666))),
+                    new HostGlobal("spectest", "global_i64", new GlobalInstance(Value.i64(666))),
+                    new HostGlobal("spectest", "global_f32", new GlobalInstance(Value.fromFloat(666.6f))),
+                    new HostGlobal("spectest", "global_f64", new GlobalInstance(Value.fromDouble(666.6))),
                 },
                 new HostMemory[] {
                     new HostMemory("spectest", "memory", new Memory(new MemoryLimits(1, 2)))
