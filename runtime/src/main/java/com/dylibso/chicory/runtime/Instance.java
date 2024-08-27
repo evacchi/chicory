@@ -463,7 +463,7 @@ public class Instance {
                             ? Memory.RUNTIME_MAX_PAGES
                             : i.limits().maximumPages();
             if (initialCurrent > initialExpected
-                    || (maxCurrent < maxExpected && maxCurrent == initialCurrent)) {
+                    || (maxCurrent < maxExpected && maxCurrent >= initialCurrent)) { // FIXME >= vs == ?
                 throw new UnlinkableException(
                         "incompatible import type, non-compatible limits, expected: "
                                 + i.limits()

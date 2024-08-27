@@ -1659,8 +1659,7 @@ public class COPY_SpecV1ImportsTest {
     public void test138() {
         var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
             new File("target/compiled-wast/imports/spec.112.wasm"))
-          .withHostImports(SpecV1ImportsHostFuncs.fallback())
-          .build());
+          .instantiate(store, "__failure"));
         assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
