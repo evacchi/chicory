@@ -1,9 +1,17 @@
 package com.dylibso.chicory.testing;
 
-import com.dylibso.chicory.runtime.*;
+import com.dylibso.chicory.runtime.ExportFunction;
+import com.dylibso.chicory.runtime.GlobalInstance;
+import com.dylibso.chicory.runtime.HostFunction;
+import com.dylibso.chicory.runtime.HostGlobal;
+import com.dylibso.chicory.runtime.HostImports;
+import com.dylibso.chicory.runtime.HostMemory;
+import com.dylibso.chicory.runtime.HostTable;
+import com.dylibso.chicory.runtime.Instance;
 import com.dylibso.chicory.wasm.Module;
-import com.dylibso.chicory.wasm.types.*;
-
+import com.dylibso.chicory.wasm.types.Export;
+import com.dylibso.chicory.wasm.types.ExportSection;
+import com.dylibso.chicory.wasm.types.FunctionType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

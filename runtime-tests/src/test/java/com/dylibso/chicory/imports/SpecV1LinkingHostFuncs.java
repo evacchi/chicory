@@ -1,13 +1,23 @@
 package com.dylibso.chicory.imports;
 
-import static com.dylibso.chicory.testing.COPY_SpecV1LinkingTest.MgInstance;
-import static com.dylibso.chicory.testing.COPY_SpecV1LinkingTest.MmInstance;
-import static com.dylibso.chicory.testing.COPY_SpecV1LinkingTest.MsInstance;
-import static com.dylibso.chicory.testing.COPY_SpecV1LinkingTest.MtInstance;
+import static com.dylibso.chicory.test.gen.SpecV1LinkingTest.MgInstance;
+import static com.dylibso.chicory.test.gen.SpecV1LinkingTest.MmInstance;
+import static com.dylibso.chicory.test.gen.SpecV1LinkingTest.MsInstance;
+import static com.dylibso.chicory.test.gen.SpecV1LinkingTest.MtInstance;
 
-import com.dylibso.chicory.runtime.*;
-import com.dylibso.chicory.wasm.types.*;
-
+import com.dylibso.chicory.runtime.GlobalInstance;
+import com.dylibso.chicory.runtime.HostFunction;
+import com.dylibso.chicory.runtime.HostGlobal;
+import com.dylibso.chicory.runtime.HostImports;
+import com.dylibso.chicory.runtime.HostMemory;
+import com.dylibso.chicory.runtime.HostTable;
+import com.dylibso.chicory.runtime.Instance;
+import com.dylibso.chicory.runtime.TableInstance;
+import com.dylibso.chicory.wasm.types.Limits;
+import com.dylibso.chicory.wasm.types.MutabilityType;
+import com.dylibso.chicory.wasm.types.Table;
+import com.dylibso.chicory.wasm.types.Value;
+import com.dylibso.chicory.wasm.types.ValueType;
 import java.util.List;
 
 public class SpecV1LinkingHostFuncs {
@@ -176,14 +186,12 @@ public class SpecV1LinkingHostFuncs {
                         new HostGlobal(
                                 "Mref_ex",
                                 "g-var-func",
-                                new GlobalInstance(Value.funcRef(0),
-                                MutabilityType.Var)))
+                                new GlobalInstance(Value.funcRef(0), MutabilityType.Var)))
                 .addGlobal(
                         new HostGlobal(
                                 "Mref_ex",
                                 "g-var-extern",
-                                new GlobalInstance(Value.externRef(0),
-                                MutabilityType.Var)))
+                                new GlobalInstance(Value.externRef(0), MutabilityType.Var)))
                 .build();
     }
 

@@ -1,5 +1,9 @@
 package com.dylibso.chicory.testing;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.dylibso.chicory.runtime.ExportFunction;
 import com.dylibso.chicory.runtime.HostFunction;
 import com.dylibso.chicory.runtime.Instance;
@@ -8,36 +12,38 @@ import com.dylibso.chicory.wasm.exceptions.UninstantiableException;
 import com.dylibso.chicory.wasm.exceptions.UnlinkableException;
 import com.dylibso.chicory.wasm.types.Value;
 import com.dylibso.chicory.wasm.types.ValueType;
-import org.junit.jupiter.api.*;
-
 import java.io.File;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class COPY_SpecV1LinkingTest {
 
-    public static Store store = new Store().addFunction(
-                    new HostFunction(
-                            (Instance instance, Value... args) -> {
-                                return null;
-                            },
-                            "spectest",
-                            "print_i32",
-                            List.of(ValueType.I32),
-                            List.of()));
-
+    public static Store store =
+            new Store()
+                    .addFunction(
+                            new HostFunction(
+                                    (Instance instance, Value... args) -> {
+                                        return null;
+                                    },
+                                    "spectest",
+                                    "print_i32",
+                                    List.of(ValueType.I32),
+                                    List.of()));
 
     public static Instance MfInstance = null;
 
     @Test()
     @Order(0)
     public void instantiate_MfInstance() {
-        MfInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.0.wasm"))
-          .instantiate(store, "Mf");
+        MfInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.0.wasm"))
+                        .instantiate(store, "Mf");
     }
 
     public static Instance NfInstance = null;
@@ -45,9 +51,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(1)
     public void instantiate_NfInstance() {
-        NfInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.1.wasm"))
-          .instantiate(store, "Nf");
+        NfInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.1.wasm"))
+                        .instantiate(store, "Nf");
     }
 
     @Test()
@@ -87,27 +93,37 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(6)
     public void instantiate_testModule2Instance() {
-        testModule2Instance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.2.wasm"))
-          .instantiate(store, "reexport_f");
+        testModule2Instance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.2.wasm"))
+                        .instantiate(store, "reexport_f");
     }
 
     @Test()
     @Order(7)
     public void test7() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.3.wasm"))
-          .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.3.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     @Test()
     @Order(8)
     public void test8() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.4.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.4.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     public static Instance MgInstance = null;
@@ -115,9 +131,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(9)
     public void instantiate_MgInstance() {
-        MgInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.5.wasm"))
-                .instantiate(store, "Mg");
+        MgInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.5.wasm"))
+                        .instantiate(store, "Mg");
     }
 
     public static Instance NgInstance = null;
@@ -125,9 +141,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(10)
     public void instantiate_NgInstance() {
-        NgInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.6.wasm"))
-                .instantiate(store, "Ng");
+        NgInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.6.wasm"))
+                        .instantiate(store, "Ng");
     }
 
     @Test()
@@ -252,19 +268,29 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(26)
     public void test26() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.7.wasm"))
-          .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.7.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     @Test()
     @Order(27)
     public void test27() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.8.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.8.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     public static Instance Mref_exInstance = null;
@@ -272,9 +298,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(28)
     public void instantiate_Mref_exInstance() {
-        Mref_exInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.9.wasm"))
-               .instantiate(store, "Mref_ex");
+        Mref_exInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.9.wasm"))
+                        .instantiate(store, "Mref_ex");
     }
 
     public static Instance Mref_imInstance = null;
@@ -282,45 +308,65 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(29)
     public void instantiate_Mref_imInstance() {
-        Mref_imInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.10.wasm"))
-                .instantiate(store, "Mref_im");
+        Mref_imInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.10.wasm"))
+                        .instantiate(store, "Mref_im");
     }
 
     @Test()
     @Order(30)
     public void test30() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.11.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.11.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     @Test()
     @Order(31)
     public void test31() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.12.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.12.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     @Test()
     @Order(32)
     public void test32() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.13.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.13.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     @Test()
     @Order(33)
     public void test33() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.14.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.14.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     public static Instance MtInstance = null;
@@ -328,9 +374,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(34)
     public void instantiate_MtInstance() {
-        MtInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.15.wasm"))
-                .instantiate(store, "Mt");
+        MtInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.15.wasm"))
+                        .instantiate(store, "Mt");
     }
 
     public static Instance NtInstance = null;
@@ -338,9 +384,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(35)
     public void instantiate_NtInstance() {
-        NtInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.16.wasm"))
-                .instantiate(store, "Nt");
+        NtInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.16.wasm"))
+                        .instantiate(store, "Nt");
     }
 
     @Test()
@@ -379,16 +425,26 @@ public class COPY_SpecV1LinkingTest {
     @Order(40)
     public void test40() {
         ExportFunction varCall = MtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("1"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("1"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(41)
     public void test41() {
         ExportFunction varMtCall = NtInstance.export("Mt.call");
-        var exception = assertThrows(ChicoryException.class, () -> varMtCall.apply(Value.i32(Integer.parseUnsignedInt("1"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varMtCall.apply(Value.i32(Integer.parseUnsignedInt("1"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
@@ -403,24 +459,39 @@ public class COPY_SpecV1LinkingTest {
     @Order(43)
     public void test43() {
         ExportFunction varCallMtCall = NtInstance.export("call Mt.call");
-        var exception = assertThrows(ChicoryException.class, () -> varCallMtCall.apply(Value.i32(Integer.parseUnsignedInt("1"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCallMtCall.apply(Value.i32(Integer.parseUnsignedInt("1"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(44)
     public void test44() {
         ExportFunction varCall = MtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(45)
     public void test45() {
         ExportFunction varMtCall = NtInstance.export("Mt.call");
-        var exception = assertThrows(ChicoryException.class, () -> varMtCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varMtCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
@@ -435,40 +506,65 @@ public class COPY_SpecV1LinkingTest {
     @Order(47)
     public void test47() {
         ExportFunction varCallMtCall = NtInstance.export("call Mt.call");
-        var exception = assertThrows(ChicoryException.class, () -> varCallMtCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCallMtCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(48)
     public void test48() {
         ExportFunction varCall = MtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("20"))));
-        assertTrue(exception.getMessage().contains("undefined element"), "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("20"))));
+        assertTrue(
+                exception.getMessage().contains("undefined element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
     }
 
     @Test()
     @Order(49)
     public void test49() {
         ExportFunction varMtCall = NtInstance.export("Mt.call");
-        var exception = assertThrows(ChicoryException.class, () -> varMtCall.apply(Value.i32(Integer.parseUnsignedInt("20"))));
-        assertTrue(exception.getMessage().contains("undefined element"), "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varMtCall.apply(Value.i32(Integer.parseUnsignedInt("20"))));
+        assertTrue(
+                exception.getMessage().contains("undefined element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
     }
 
     @Test()
     @Order(50)
     public void test50() {
         ExportFunction varCall = NtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("7"))));
-        assertTrue(exception.getMessage().contains("undefined element"), "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("7"))));
+        assertTrue(
+                exception.getMessage().contains("undefined element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
     }
 
     @Test()
     @Order(51)
     public void test51() {
         ExportFunction varCallMtCall = NtInstance.export("call Mt.call");
-        var exception = assertThrows(ChicoryException.class, () -> varCallMtCall.apply(Value.i32(Integer.parseUnsignedInt("20"))));
-        assertTrue(exception.getMessage().contains("undefined element"), "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCallMtCall.apply(Value.i32(Integer.parseUnsignedInt("20"))));
+        assertTrue(
+                exception.getMessage().contains("undefined element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
     }
 
     @Test()
@@ -483,8 +579,13 @@ public class COPY_SpecV1LinkingTest {
     @Order(53)
     public void test53() {
         ExportFunction varCall = NtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("4"))));
-        assertTrue(exception.getMessage().contains("indirect call type mismatch"), "'" + exception.getMessage() + "' doesn't contains: 'indirect call type mismatch");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("4"))));
+        assertTrue(
+                exception.getMessage().contains("indirect call type mismatch"),
+                "'" + exception.getMessage() + "' doesn't contains: 'indirect call type mismatch");
     }
 
     public static Instance OtInstance = null;
@@ -492,9 +593,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(54)
     public void instantiate_OtInstance() {
-        OtInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.17.wasm"))
-                .instantiate(store, "Ot");
+        OtInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.17.wasm"))
+                        .instantiate(store, "Ot");
     }
 
     @Test()
@@ -613,16 +714,26 @@ public class COPY_SpecV1LinkingTest {
     @Order(69)
     public void test69() {
         ExportFunction varCall = MtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(70)
     public void test70() {
         ExportFunction varMtCall = NtInstance.export("Mt.call");
-        var exception = assertThrows(ChicoryException.class, () -> varMtCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varMtCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
@@ -637,24 +748,39 @@ public class COPY_SpecV1LinkingTest {
     @Order(72)
     public void test72() {
         ExportFunction varCallMtCall = NtInstance.export("call Mt.call");
-        var exception = assertThrows(ChicoryException.class, () -> varCallMtCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCallMtCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(73)
     public void test73() {
         ExportFunction varCall = OtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("0"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(74)
     public void test74() {
         ExportFunction varCall = OtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("20"))));
-        assertTrue(exception.getMessage().contains("undefined element"), "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("20"))));
+        assertTrue(
+                exception.getMessage().contains("undefined element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'undefined element");
     }
 
     public static Instance testModule10Instance = null;
@@ -662,9 +788,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(75)
     public void instantiate_testModule10Instance() {
-        testModule10Instance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.18.wasm"))
-                .instantiate(store, "__ignore");
+        testModule10Instance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.18.wasm"))
+                        .instantiate(store, "__ignore");
     }
 
     public static Instance G1Instance = null;
@@ -672,9 +798,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(76)
     public void instantiate_G1Instance() {
-        G1Instance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.19.wasm"))
-                .instantiate(store, "G1");
+        G1Instance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.19.wasm"))
+                        .instantiate(store, "G1");
     }
 
     public static Instance G2Instance = null;
@@ -682,9 +808,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(77)
     public void instantiate_G2Instance() {
-        G2Instance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.20.wasm"))
-                .instantiate(store, "G2");
+        G2Instance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.20.wasm"))
+                        .instantiate(store, "G2");
     }
 
     @Test()
@@ -698,36 +824,56 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(79)
     public void test79() {
-        var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.21.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
+        var exception =
+                assertThrows(
+                        UninstantiableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.21.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("out of bounds table access"),
+                "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
     @Test()
     @Order(80)
     public void test80() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.22.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("unknown import"), "'" + exception.getMessage() + "' doesn't contains: 'unknown import");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.22.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("unknown import"),
+                "'" + exception.getMessage() + "' doesn't contains: 'unknown import");
     }
 
     @Test()
     @Order(81)
     public void test81() {
         ExportFunction varCall = MtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("7"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("7"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(82)
     public void test82() {
-        var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.23.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
+        var exception =
+                assertThrows(
+                        UninstantiableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.23.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("out of bounds table access"),
+                "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
     @Test()
@@ -742,17 +888,27 @@ public class COPY_SpecV1LinkingTest {
     @Order(84)
     public void test84() {
         ExportFunction varCall = MtInstance.export("call");
-        var exception = assertThrows(ChicoryException.class, () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("8"))));
-        assertTrue(exception.getMessage().contains("uninitialized element"), "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
+        var exception =
+                assertThrows(
+                        ChicoryException.class,
+                        () -> varCall.apply(Value.i32(Integer.parseUnsignedInt("8"))));
+        assertTrue(
+                exception.getMessage().contains("uninitialized element"),
+                "'" + exception.getMessage() + "' doesn't contains: 'uninitialized element");
     }
 
     @Test()
     @Order(85)
     public void test85() {
-        var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.24.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
+        var exception =
+                assertThrows(
+                        UninstantiableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.24.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("out of bounds memory access"),
+                "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
     @Test()
@@ -768,9 +924,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(87)
     public void instantiate_Mtable_exInstance() {
-        Mtable_exInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.25.wasm"))
-                .instantiate(store, "Mtable_ex");
+        Mtable_exInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.25.wasm"))
+                        .instantiate(store, "Mtable_ex");
     }
 
     public static Instance testModule14Instance = null;
@@ -778,27 +934,37 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(88)
     public void instantiate_testModule14Instance() {
-        testModule14Instance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.26.wasm"))
-                .instantiate(store, "__ignore");
+        testModule14Instance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.26.wasm"))
+                        .instantiate(store, "__ignore");
     }
 
     @Test()
     @Order(89)
     public void test89() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.27.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.27.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     @Test()
     @Order(90)
     public void test90() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.28.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.28.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     public static Instance MmInstance = null;
@@ -806,10 +972,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(91)
     public void instantiate_MmInstance() {
-        MmInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.29.wasm"))
-                .instantiate(store, "Mm");
-
+        MmInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.29.wasm"))
+                        .instantiate(store, "Mm");
     }
 
     public static Instance NmInstance = null;
@@ -817,9 +982,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(92)
     public void instantiate_NmInstance() {
-        NmInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.30.wasm"))
-                .instantiate(store, "Nm");
+        NmInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.30.wasm"))
+                        .instantiate(store, "Nm");
     }
 
     @Test()
@@ -851,9 +1016,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(96)
     public void instantiate_OmInstance() {
-        OmInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.31.wasm"))
-                .instantiate(store, "Om");
+        OmInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.31.wasm"))
+                        .instantiate(store, "Om");
     }
 
     @Test()
@@ -893,18 +1058,23 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(101)
     public void instantiate_testModule18Instance() {
-        testModule18Instance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.32.wasm"))
-                .instantiate(store, "_ignore");
+        testModule18Instance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.32.wasm"))
+                        .instantiate(store, "_ignore");
     }
 
     @Test()
     @Order(102)
     public void test102() {
-        var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.33.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
+        var exception =
+                assertThrows(
+                        UninstantiableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.33.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("out of bounds memory access"),
+                "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
     public static Instance PmInstance = null;
@@ -912,9 +1082,9 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(103)
     public void instantiate_PmInstance() {
-        PmInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.34.wasm"))
-                .instantiate(store, "Pm");
+        PmInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.34.wasm"))
+                        .instantiate(store, "Pm");
     }
 
     @Test()
@@ -984,10 +1154,15 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(112)
     public void test112() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.35.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("unknown import"), "'" + exception.getMessage() + "' doesn't contains: 'unknown import");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.35.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("unknown import"),
+                "'" + exception.getMessage() + "' doesn't contains: 'unknown import");
     }
 
     @Test()
@@ -1001,10 +1176,15 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(114)
     public void test114() {
-        var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.36.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("out of bounds memory access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
+        var exception =
+                assertThrows(
+                        UninstantiableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.36.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("out of bounds memory access"),
+                "'" + exception.getMessage() + "' doesn't contains: 'out of bounds memory access");
     }
 
     @Test()
@@ -1026,10 +1206,15 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(117)
     public void test117() {
-        var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.37.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("out of bounds table access"), "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
+        var exception =
+                assertThrows(
+                        UninstantiableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.37.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("out of bounds table access"),
+                "'" + exception.getMessage() + "' doesn't contains: 'out of bounds table access");
     }
 
     @Test()
@@ -1045,18 +1230,23 @@ public class COPY_SpecV1LinkingTest {
     @Test()
     @Order(119)
     public void instantiate_MsInstance() {
-        MsInstance = TestModule.of(
-            new File("target/compiled-wast/linking/spec.38.wasm"))
-                .instantiate(store, "Ms");
+        MsInstance =
+                TestModule.of(new File("target/compiled-wast/linking/spec.38.wasm"))
+                        .instantiate(store, "Ms");
     }
 
     @Test()
     @Order(120)
     public void test120() {
-        var exception = assertThrows(UninstantiableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/linking/spec.39.wasm"))
-                .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("unreachable"), "'" + exception.getMessage() + "' doesn't contains: 'unreachable");
+        var exception =
+                assertThrows(
+                        UninstantiableException.class,
+                        () ->
+                                TestModule.of(new File("target/compiled-wast/linking/spec.39.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("unreachable"),
+                "'" + exception.getMessage() + "' doesn't contains: 'unreachable");
     }
 
     @Test()
