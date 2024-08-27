@@ -110,14 +110,8 @@ public class Store {
                     break;
 
                 case GLOBAL:
-//                    Global global = m.globalSection().getGlobal(export.index());
                     GlobalInstance g = instance.global(export.index());
-                    MutabilityType mtype =
-                            exportName.contains("mut") || exportName.contains("var")  // FIXME temporary hack
-                                    ?
-                                    MutabilityType.Var
-                                    : MutabilityType.Const;
-                    this.addGlobal(new HostGlobal(name, exportName, g, mtype));
+                    this.addGlobal(new HostGlobal(name, exportName, g));
                     break;
             }
         }
