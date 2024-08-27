@@ -17,7 +17,7 @@ import com.dylibso.chicory.wasm.types.Value;
 import com.dylibso.chicory.wasm.types.ValueType;
 import java.util.List;
 
-public class Spectest  {
+public class Spectest {
     private static final WasmFunctionHandle noop = (Instance instance, Value... args) -> null;
 
     public static HostImports toHostImports() {
@@ -55,8 +55,10 @@ public class Spectest  {
                 new HostGlobal[] {
                     new HostGlobal("spectest", "global_i32", new GlobalInstance(Value.i32(666))),
                     new HostGlobal("spectest", "global_i64", new GlobalInstance(Value.i64(666))),
-                    new HostGlobal("spectest", "global_f32", new GlobalInstance(Value.fromFloat(666.6f))),
-                    new HostGlobal("spectest", "global_f64", new GlobalInstance(Value.fromDouble(666.6))),
+                    new HostGlobal(
+                            "spectest", "global_f32", new GlobalInstance(Value.fromFloat(666.6f))),
+                    new HostGlobal(
+                            "spectest", "global_f64", new GlobalInstance(Value.fromDouble(666.6))),
                 },
                 new HostMemory[] {
                     new HostMemory("spectest", "memory", new Memory(new MemoryLimits(1, 2)))

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dylibso.chicory.imports.SpecV1ImportsHostFuncs;
 import com.dylibso.chicory.runtime.ExportFunction;
 import com.dylibso.chicory.runtime.Instance;
 import com.dylibso.chicory.wasm.exceptions.ChicoryException;
@@ -23,9 +22,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class COPY_SpecV1ImportsTest {
 
-    public static Store store = new Store()
-            .addHostImports(Spectest.toHostImports());
-
+    public static Store store = new Store().addHostImports(Spectest.toHostImports());
 
     public static Instance testModule0Instance = null;
 
@@ -525,9 +522,9 @@ public class COPY_SpecV1ImportsTest {
     @Test()
     @Order(40)
     public void instantiate_testModule11Instance() {
-        testModule11Instance = TestModule.of(
-            new File("target/compiled-wast/imports/spec.36.wasm"))
-          .instantiate(store, "testModule11");
+        testModule11Instance =
+                TestModule.of(new File("target/compiled-wast/imports/spec.36.wasm"))
+                        .instantiate(store, "testModule11");
     }
 
     @Test()
@@ -1657,10 +1654,17 @@ public class COPY_SpecV1ImportsTest {
     @Test()
     @Order(138) // FIXME
     public void test138() {
-        var exception = assertThrows(UnlinkableException.class, () -> TestModule.of(
-            new File("target/compiled-wast/imports/spec.112.wasm"))
-          .instantiate(store, "__failure"));
-        assertTrue(exception.getMessage().contains("incompatible import type"), "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
+        var exception =
+                assertThrows(
+                        UnlinkableException.class,
+                        () ->
+                                TestModule.of(
+                                                new File(
+                                                        "target/compiled-wast/imports/spec.112.wasm"))
+                                        .instantiate(store, "__failure"));
+        assertTrue(
+                exception.getMessage().contains("incompatible import type"),
+                "'" + exception.getMessage() + "' doesn't contains: 'incompatible import type");
     }
 
     @Test()
@@ -1896,9 +1900,9 @@ public class COPY_SpecV1ImportsTest {
     @Test()
     @Order(157)
     public void instantiate_Mgim1Instance() {
-        Mgim1Instance = TestModule.of(
-            new File("target/compiled-wast/imports/spec.125.wasm"))
-          .instantiate(store, "grown-imported-memory");
+        Mgim1Instance =
+                TestModule.of(new File("target/compiled-wast/imports/spec.125.wasm"))
+                        .instantiate(store, "grown-imported-memory");
     }
 
     @Test()

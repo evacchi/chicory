@@ -455,7 +455,8 @@ public class Instance {
         }
 
         private void validateHostMemoryType(MemoryImport i, HostMemory m) {
-            var initialExpected = m.memory().pages(); // FIXME is this correct or should MemoryLimits become mutable?
+            // FIXME is this correct or should MemoryLimits become mutable?
+            var initialExpected = m.memory().pages();
             var maxExpected = m.memory().maximumPages();
             var initialCurrent = i.limits().initialPages();
             var maxCurrent =
@@ -463,7 +464,8 @@ public class Instance {
                             ? Memory.RUNTIME_MAX_PAGES
                             : i.limits().maximumPages();
             if (initialCurrent > initialExpected
-                    || (maxCurrent < maxExpected && maxCurrent >= initialCurrent)) { // FIXME >= vs == ?
+                    || (maxCurrent < maxExpected
+                            && maxCurrent >= initialCurrent)) { // FIXME >= vs == ?
                 throw new UnlinkableException(
                         "incompatible import type, non-compatible limits, expected: "
                                 + i.limits()
