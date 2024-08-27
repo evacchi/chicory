@@ -5,15 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dylibso.chicory.runtime.ExportFunction;
-import com.dylibso.chicory.runtime.HostFunction;
 import com.dylibso.chicory.runtime.Instance;
 import com.dylibso.chicory.wasm.exceptions.ChicoryException;
 import com.dylibso.chicory.wasm.exceptions.UninstantiableException;
 import com.dylibso.chicory.wasm.exceptions.UnlinkableException;
 import com.dylibso.chicory.wasm.types.Value;
-import com.dylibso.chicory.wasm.types.ValueType;
 import java.io.File;
-import java.util.List;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -24,17 +21,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class COPY_SpecV1LinkingTest {
 
-    public static Store store =
-            new Store()
-                    .addFunction(
-                            new HostFunction(
-                                    (Instance instance, Value... args) -> {
-                                        return null;
-                                    },
-                                    "spectest",
-                                    "print_i32",
-                                    List.of(ValueType.I32),
-                                    List.of()));
+    public static Store store = new Store().addHostImports(Spectest.toHostImports());
 
     public static Instance MfInstance = null;
 

@@ -76,6 +76,13 @@ public class Store {
         return this;
     }
 
+    public Store addHostImports(HostImports hostImports) {
+        return this.addGlobal(hostImports.globals())
+                .addFunction(hostImports.functions())
+                .addMemory(hostImports.memories())
+                .addTable(hostImports.tables());
+    }
+
     private HostImports toHostImports() {
         final HostImports hostImports =
                 new HostImports(

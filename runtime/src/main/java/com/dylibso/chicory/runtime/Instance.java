@@ -455,7 +455,7 @@ public class Instance {
         }
 
         private void validateHostMemoryType(MemoryImport i, HostMemory m) {
-            var initialExpected = m.memory().initialPages();
+            var initialExpected = m.memory().pages(); // FIXME is this correct or should MemoryLimits become mutable?
             var maxExpected = m.memory().maximumPages();
             var initialCurrent = i.limits().initialPages();
             var maxCurrent =
