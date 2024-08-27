@@ -268,7 +268,7 @@ public class SpecV1ImportsHostFuncs {
                                 "global-mut-i64",
                                 new GlobalInstance(Value.i64(0), MutabilityType.Var)))
                 .addMemory(
-                        new HostMemory("spectest", "memory", new Memory(new MemoryLimits(1))),
+                        new HostMemory("spectest", "memory", new Memory(new MemoryLimits(1, 2))),
                         new HostMemory(
                                 "test", "memory-2-inf", new Memory(MemoryLimits.defaultLimits())))
                 .addTable(table, table10Inf, table1020)
