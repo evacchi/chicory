@@ -63,7 +63,7 @@ public class ConstantEvaluators {
                     {
                         var idx = (int) instruction.operands()[0];
                         if (idx < instance.imports().globalCount()) {
-                            if (instance.imports().global(idx).mutabilityType()
+                            if (instance.imports().global(idx).instance().getMutabilityType()
                                     != MutabilityType.Const) {
                                 throw new InvalidException(
                                         "constant expression required, initializer expression"

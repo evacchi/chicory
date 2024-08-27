@@ -103,7 +103,7 @@ public class SpecV1LinkingHostFuncs {
                                 List.of()))
                 .addGlobal(
                         new HostGlobal("Mg", "glob", MgInstance.global(0)),
-                        new HostGlobal("Mg", "mut_glob", MgInstance.global(1), MutabilityType.Var))
+                        new HostGlobal("Mg", "mut_glob", MgInstance.global(1)))
                 .build();
     }
 
@@ -184,14 +184,12 @@ public class SpecV1LinkingHostFuncs {
                         new HostGlobal(
                                 "Mref_ex",
                                 "g-var-func",
-                                new GlobalInstance(Value.funcRef(0)),
-                                MutabilityType.Var))
+                                new GlobalInstance(Value.funcRef(0), MutabilityType.Var)))
                 .addGlobal(
                         new HostGlobal(
                                 "Mref_ex",
                                 "g-var-extern",
-                                new GlobalInstance(Value.externRef(0)),
-                                MutabilityType.Var))
+                                new GlobalInstance(Value.externRef(0), MutabilityType.Var)))
                 .build();
     }
 
@@ -229,14 +227,12 @@ public class SpecV1LinkingHostFuncs {
                                 new HostGlobal(
                                         "Mref_ex",
                                         "g-var-func",
-                                        new GlobalInstance(Value.funcRef(0)),
-                                        MutabilityType.Var))
+                                        new GlobalInstance(Value.funcRef(0), MutabilityType.Var)))
                         .addGlobal(
                                 new HostGlobal(
                                         "Mref_ex",
                                         "g-var-extern",
-                                        new GlobalInstance(Value.externRef(0)),
-                                        MutabilityType.Var))
+                                        new GlobalInstance(Value.externRef(0), MutabilityType.Var)))
                         .addTable(
                                 new HostTable(
                                         "Mtable_ex",
@@ -253,7 +249,7 @@ public class SpecV1LinkingHostFuncs {
         if (MgInstance != null) {
             builder.addGlobal(
                     new HostGlobal("Mg", "glob", MgInstance.global(0)),
-                    new HostGlobal("Mg", "mut_glob", MgInstance.global(1), MutabilityType.Var));
+                    new HostGlobal("Mg", "mut_glob", MgInstance.global(1)));
         }
 
         if (MsInstance != null) {
