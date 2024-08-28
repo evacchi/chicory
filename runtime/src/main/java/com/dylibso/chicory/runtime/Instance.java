@@ -578,6 +578,7 @@ public class Instance {
                         hostFuncIdx++;
                         break;
                     case GLOBAL:
+//                        found = true;
                         cnt = hostImports.globalCount();
                         for (int j = 0; j < cnt; j++) {
                             HostGlobal g = hostImports.global(j);

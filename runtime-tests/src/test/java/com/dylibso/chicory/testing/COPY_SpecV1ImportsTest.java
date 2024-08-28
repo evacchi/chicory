@@ -31,7 +31,7 @@ public class COPY_SpecV1ImportsTest {
     public void instantiate_testModule0Instance() {
         testModule0Instance =
                 TestModule.of(new File("target/compiled-wast/imports/spec.0.wasm"))
-                        .instantiate(store, "test");
+                        .instantiate(store);
     }
 
     public static Instance testModule1Instance = null;
@@ -39,6 +39,8 @@ public class COPY_SpecV1ImportsTest {
     @Test()
     @Order(1)
     public void instantiate_testModule1Instance() {
+        store.register("test", testModule0Instance);
+
         testModule1Instance =
                 TestModule.of(new File("target/compiled-wast/imports/spec.1.wasm"))
                         .instantiate(store, "testModule1");

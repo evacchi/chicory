@@ -3,10 +3,12 @@ package com.dylibso.chicory.runtime;
 import static com.dylibso.chicory.wasm.types.OpCode.GLOBAL_GET;
 
 import com.dylibso.chicory.wasm.exceptions.InvalidException;
+import com.dylibso.chicory.wasm.types.Global;
 import com.dylibso.chicory.wasm.types.Instruction;
 import com.dylibso.chicory.wasm.types.MutabilityType;
 import com.dylibso.chicory.wasm.types.Value;
 import com.dylibso.chicory.wasm.types.ValueType;
+import com.dylibso.chicory.wasm.Module;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,7 +65,11 @@ public class ConstantEvaluators {
                     {
                         var idx = (int) instruction.operands()[0];
                         if (idx < instance.imports().globalCount()) {
-                            if (instance.imports().global(idx).instance().getMutabilityType()
+                            HostGlobal global = instance.imports().global(idx);
+//                            if (global == null) {
+//                                throw new InvalidException("type mismatch, constant expression required");
+//                            }
+                            if (global.instance().getMutabilityType()
                                     != MutabilityType.Const) {
                                 throw new InvalidException(
                                         "constant expression required, initializer expression"

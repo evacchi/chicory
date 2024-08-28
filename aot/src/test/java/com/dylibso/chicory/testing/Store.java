@@ -104,7 +104,7 @@ public class Store {
         return instance;
     }
 
-    public Store register(String name, Instance instance) {
+    public void register(String name, Instance instance) {
         ExportSection exportSection = instance.module().exportSection();
         for (int i = 0; i < exportSection.exportCount(); i++) {
             Export export = exportSection.getExport(i);
@@ -136,6 +136,5 @@ public class Store {
                     break;
             }
         }
-        return this;
     }
 }

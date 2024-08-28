@@ -314,6 +314,62 @@ final class Validator {
     }
 
     public void validateModule() {
+        Global[] globals = module.globalSection().globals();
+        for (int i = 0; i < globals.length; i++) {
+            Global g = globals[i];
+            List<Instruction> init = g.initInstructions();
+            if (init.isEmpty()) {
+                throw new InvalidException("type mismatch");
+            }
+
+            var j = i;
+
+            {
+                Instruction inst = init.get(0);
+                ValueType exprType = null;
+                switch (inst.opcode()) {
+                    case I32_CONST:
+                        exprType = ValueType.I32;
+                        break;
+                    case I64_CONST:
+                        exprType = ValueType.I64;
+                        break;
+                    case F32_CONST:
+                        exprType = ValueType.F32;
+                        break;
+                    case F64_CONST:
+                        exprType = ValueType.F64;
+                        break;
+                }
+
+                if (exprType != null && exprType != g.valueType()) {
+                    throw new InvalidException("type mismatch");
+                }
+            }
+
+            // A global constant expression cannot call global.get twice.
+            long globalGetCount = init.stream().filter(inst -> inst.opcode() == OpCode.GLOBAL_GET).count();
+            if (globalGetCount > 1) {
+                throw new InvalidException("type mismatch");
+            }
+
+
+            // A global constant expression must match types.
+            if (g.initInstructions().stream().filter(inst -> inst.opcode() == OpCode.GLOBAL_GET && inst.operands()[0] < 0  && inst.operands()[0] >= j)
+                    .findFirst().filter(inst -> globals[ (int) inst.operands()[0] ].valueType() == g.valueType() ).isPresent()) {
+                throw new InvalidException("type mismatch");
+            }
+
+            // A global constant expression cannot self-reference itself.
+            if (g.initInstructions().stream().anyMatch(inst -> inst.opcode() == OpCode.GLOBAL_GET && inst.operands()[0] == j)) {
+                throw new InvalidException("unknown global");
+            }
+
+
+
+
+        }
+
         if (module.functionSection().functionCount() != module.codeSection().functionBodyCount()) {
             throw new MalformedException("function and code section have inconsistent lengths");
         }

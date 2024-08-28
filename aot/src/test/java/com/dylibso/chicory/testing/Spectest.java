@@ -26,7 +26,8 @@ public class Spectest {
         return new HostImports(
                 new HostFunction[]{
                         new HostFunction(
-                                noop, "spectest",
+                                noop,
+                                "spectest",
                                 "print",
                                 List.of(),
                                 List.of()),

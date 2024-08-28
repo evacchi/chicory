@@ -71,6 +71,11 @@ public class TestModule {
         return s.instantiate(name, module);
     }
 
+    public Instance instantiate(Store s) {
+        HostImports hostImports = s.toHostImports();
+        return Instance.builder(module).withHostImports(hostImports).build();
+    }
+
     public TestModule withHostImports(HostImports imports) {
         this.imports = imports;
         return this;

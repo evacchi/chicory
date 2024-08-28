@@ -78,7 +78,6 @@ public class JavaTestGen {
             String name, Wast wast, File wasmFilesFolder, SourceRoot importsSourceRoot) {
         var cu = new CompilationUnit("com.dylibso.chicory.test.gen");
         var testName = "SpecV1" + capitalize(escapedCamelCase(name)) + "Test";
-        var importsName = "SpecV1" + capitalize(escapedCamelCase(name)) + "HostFuncs";
         cu.setStorage(sourceTargetFolder.toPath().resolve(testName + ".java"));
 
         // all the imports
@@ -113,6 +112,10 @@ public class JavaTestGen {
         // import for host functions
         cu.addImport("com.dylibso.chicory.imports.*");
 
+        // import for Store instance.
+        cu.addImport("com.dylibso.chicory.testing.Store");
+        cu.addImport("com.dylibso.chicory.testing.Spectest");
+
         var testClass = cu.addClass(testName);
         testClass.addSingleMemberAnnotation(
                 "TestMethodOrder", new NameExpr("MethodOrderer.OrderAnnotation.class"));
@@ -134,6 +137,11 @@ public class JavaTestGen {
                         .map(t -> t.substring(testName.length() + 1))
                         .collect(Collectors.toList());
 
+        testClass.addFieldWithInitializer(
+                "Store",
+                "store",
+                new NameExpr("new Store().addHostImports(Spectest.toHostImports())"));
+
         String currentWasmFile = null;
         for (var cmd : wast.commands()) {
             switch (cmd.type()) {
@@ -147,8 +155,6 @@ public class JavaTestGen {
                             lastModuleVarName = cmd.name().replace("$", "");
                             lastInstanceVarName = cmd.name().replace("$", "") + "Instance";
                         }
-                        String hostFuncs =
-                                detectImports(importsName, lastModuleVarName, importsSourceRoot);
                         testClass.addFieldWithInitializer(
                                 "Instance",
                                 lastInstanceVarName,
@@ -172,8 +178,6 @@ public class JavaTestGen {
                                                         generateModuleInstantiation(
                                                                 cmd,
                                                                 currentWasmFile,
-                                                                importsName,
-                                                                hostFuncs,
                                                                 getExcluded(
                                                                         CommandType.ASSERT_INVALID,
                                                                         name)),
@@ -211,7 +215,24 @@ public class JavaTestGen {
                         break;
                     }
                 case REGISTER:
-                    // should be irrelevant
+                    String lastInstanceVarName = lastModuleVarName + "Instance";
+
+                    generateRegisterInstance(cmd, cmd.as(), lastInstanceVarName);
+
+                    var instantiateMethodName = "register_" + lastInstanceVarName;
+                    var instantiateMethod =
+                            testClass.addMethod(instantiateMethodName, Modifier.Keyword.PUBLIC);
+                    // It needs to be a test to be executed
+                    instantiateMethod.addAnnotation("Test");
+                    instantiateMethod.addSingleMemberAnnotation(
+                            "Order", new IntegerLiteralExpr(Integer.toString(testNumber++)));
+
+                    instantiateMethod.setBody(
+                            new BlockStmt()
+                                    .addStatement(
+                                            generateRegisterInstance(
+                                                    cmd, cmd.as(), lastInstanceVarName)));
+
                     break;
                 case ASSERT_MALFORMED:
                 case ASSERT_INVALID:
@@ -219,14 +240,10 @@ public class JavaTestGen {
                 case ASSERT_UNLINKABLE:
                     {
                         method = createTestMethod(testClass, testNumber++, excludedMethods);
-                        String hostFuncs =
-                                detectImports(importsName, "fallback", importsSourceRoot);
                         generateAssertThrows(
                                 wasmFilesFolder,
                                 cmd,
                                 method,
-                                importsName,
-                                hostFuncs,
                                 getExcluded(cmd.type(), name),
                                 getExceptionType(cmd.type()));
                         break;
@@ -398,11 +415,7 @@ public class JavaTestGen {
     private static final String INDENT = TAB + TAB + TAB + TAB + TAB;
 
     private static NameExpr generateModuleInstantiation(
-            Command cmd,
-            String wasmFile,
-            String importsName,
-            String hostFuncs,
-            boolean excludeInvalid) {
+            Command cmd, String wasmFile, boolean excludeInvalid) {
         return new NameExpr(
                 "TestModule.of(\n"
                         + INDENT
@@ -411,41 +424,11 @@ public class JavaTestGen {
                         + wasmFile
                         + "\"))\n"
                         + ((excludeInvalid) ? INDENT + ".withTypeValidation(false)\n" : "")
-                        + ((hostFuncs != null)
-                                ? INDENT
-                                        + ".withHostImports("
-                                        + importsName
-                                        + "."
-                                        + hostFuncs
-                                        + "())\n"
-                                : "")
-                        + INDENT
-                        + ".build()");
+                        + ".instantiate(store)");
     }
 
-    private String detectImports(String importsName, String varName, SourceRoot testSourcesRoot) {
-        String hostFuncs = null;
-        try {
-            var parsed =
-                    testSourcesRoot.tryToParse(
-                            "com.dylibso.chicory.imports", importsName + ".java");
-            if (parsed.isSuccessful()) {
-                var methods =
-                        parsed.getResult().get().getClassByName(importsName).get().getMethods();
-
-                for (int i = 0; i < methods.size(); i++) {
-                    if (methods.get(i).getName().asString().equals(varName)) {
-                        hostFuncs = varName;
-                    }
-                }
-                if (hostFuncs == null) {
-                    hostFuncs = "fallback";
-                }
-            }
-        } catch (Exception e) {
-            // ignore
-        }
-        return hostFuncs;
+    private static NameExpr generateRegisterInstance(Command cmd, String name, String instance) {
+        return new NameExpr("store.register(\"" + name + "\", " + instance + ")");
     }
 
     private String getWasmFile(Command cmd, File folder) {
@@ -461,8 +444,6 @@ public class JavaTestGen {
             File wasmFilesFolder,
             Command cmd,
             MethodDeclaration method,
-            String importsName,
-            String hostFuncs,
             boolean excluded,
             String exceptionType) {
 
@@ -476,8 +457,7 @@ public class JavaTestGen {
                                 + "assertThrows("
                                 + exceptionType
                                 + ".class, () -> "
-                                + generateModuleInstantiation(
-                                        cmd, wasmFile, importsName, hostFuncs, false)
+                                + generateModuleInstantiation(cmd, wasmFile, false)
                                 + ")");
 
         method.getBody().get().addStatement(assertThrows);
