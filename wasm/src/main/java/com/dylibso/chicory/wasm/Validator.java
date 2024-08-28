@@ -315,7 +315,7 @@ final class Validator {
     }
 
     public void validateModule() {
-        validateGlobals2();
+        validateGlobals();
 
         if (module.functionSection().functionCount() != module.codeSection().functionBodyCount()) {
             throw new MalformedException("function and code section have inconsistent lengths");
@@ -340,7 +340,7 @@ final class Validator {
         }
     }
 
-    private void validateGlobals2() {
+    private void validateGlobals() {
         List<GlobalImport> importedGlobals =
                 module.importSection().stream()
                         .filter(i -> i.importType() == ExternalType.GLOBAL)
@@ -430,103 +430,6 @@ final class Validator {
                     throw new InvalidException(
                             "type mismatch, multiple constant expressions found");
                 }
-            }
-        }
-    }
-
-    private void validateGlobals() {
-        List<Import> importedGlobals =
-                module.importSection().stream()
-                        .filter(i -> i.importType() == ExternalType.GLOBAL)
-                        .collect(toList());
-
-        int nGlobalImports = importedGlobals.size();
-
-        Global[] globals = module.globalSection().globals();
-        for (int i = 0; i < globals.length; i++) {
-            Global g = globals[i];
-            List<Instruction> init = g.initInstructions();
-            if (init.isEmpty()) {
-                throw new InvalidException("type mismatch");
-            }
-
-            var j = nGlobalImports + i;
-
-            {
-                Instruction inst = init.get(0);
-                ValueType exprType = null;
-                switch (inst.opcode()) {
-                    case I32_CONST:
-                        exprType = ValueType.I32;
-                        break;
-                    case I64_CONST:
-                        exprType = ValueType.I64;
-                        break;
-                    case F32_CONST:
-                        exprType = ValueType.F32;
-                        break;
-                    case F64_CONST:
-                        exprType = ValueType.F64;
-                        break;
-                }
-
-                if (exprType != null && exprType != g.valueType()) {
-                    throw new InvalidException("type mismatch");
-                }
-            }
-
-            // A global constant expression cannot call global.get twice.
-            long globalConstCount =
-                    init.stream()
-                            .filter(
-                                    inst ->
-                                            inst.opcode() == OpCode.GLOBAL_GET
-                                                    || inst.opcode() == OpCode.I32_CONST)
-                            .count();
-            if (globalConstCount > 1) {
-                throw new InvalidException("type mismatch");
-            }
-
-            // A global constant expression must match types.
-            if (g.initInstructions().stream()
-                    .filter(inst -> inst.opcode() == OpCode.GLOBAL_GET)
-                    .findFirst()
-                    .filter(
-                            inst -> {
-                                int idx = (int) inst.operands()[0];
-                                if (idx >= importedGlobals.size()) {
-                                    return false;
-                                }
-                                GlobalImport imp =
-                                        (GlobalImport) module.importSection().getImport(idx);
-                                return imp.type() != g.valueType();
-                            })
-                    .isPresent()) {
-                throw new InvalidException("type mismatch");
-            }
-
-            if (g.initInstructions().stream()
-                    .filter(inst -> inst.opcode() == OpCode.GLOBAL_GET)
-                    .findFirst()
-                    .filter(
-                            inst -> {
-                                int idx = (int) inst.operands()[0];
-                                if (idx >= importedGlobals.size()) {
-                                    return false;
-                                }
-                                GlobalImport imp =
-                                        (GlobalImport) module.importSection().getImport(idx);
-                                return imp.mutabilityType() != MutabilityType.Const;
-                            })
-                    .isPresent()) {
-                throw new InvalidException("constant expression required");
-            }
-
-            // A global constant expression cannot self-reference itself.
-            if (g.initInstructions().stream()
-                    .anyMatch(
-                            inst -> inst.opcode() == OpCode.GLOBAL_GET && inst.operands()[0] > j)) {
-                throw new InvalidException("unknown global");
             }
         }
     }
