@@ -2,6 +2,7 @@ package com.dylibso.chicory.testing;
 
 import com.dylibso.chicory.runtime.HostImports;
 import com.dylibso.chicory.runtime.Instance;
+import com.dylibso.chicory.runtime.Store;
 import com.dylibso.chicory.wabt.Wat2Wasm;
 import com.dylibso.chicory.wasm.Module;
 import com.dylibso.chicory.wasm.Parser;

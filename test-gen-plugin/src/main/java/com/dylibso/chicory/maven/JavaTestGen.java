@@ -109,8 +109,9 @@ public class JavaTestGen {
         cu.addImport("com.dylibso.chicory.wasm.exceptions.UnlinkableException");
         cu.addImport("com.dylibso.chicory.wasm.types.Value");
 
-        // import for Store instance.
-        cu.addImport("com.dylibso.chicory.testing.Store");
+        // import for Store instance
+        cu.addImport("com.dylibso.chicory.runtime.Store");
+        // import for shared Spectest host module
         cu.addImport("com.dylibso.chicory.testing.Spectest");
 
         var testClass = cu.addClass(testName);

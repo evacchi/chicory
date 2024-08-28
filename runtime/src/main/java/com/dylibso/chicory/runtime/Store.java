@@ -1,78 +1,48 @@
-package com.dylibso.chicory.testing;
+package com.dylibso.chicory.runtime;
 
-import com.dylibso.chicory.runtime.ExportFunction;
-import com.dylibso.chicory.runtime.GlobalInstance;
-import com.dylibso.chicory.runtime.HostFunction;
-import com.dylibso.chicory.runtime.HostGlobal;
-import com.dylibso.chicory.runtime.HostImports;
-import com.dylibso.chicory.runtime.HostMemory;
-import com.dylibso.chicory.runtime.HostTable;
-import com.dylibso.chicory.runtime.Instance;
 import com.dylibso.chicory.wasm.Module;
 import com.dylibso.chicory.wasm.types.Export;
 import com.dylibso.chicory.wasm.types.ExportSection;
 import com.dylibso.chicory.wasm.types.FunctionType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Objects;
 
+/**
+ * The runtime storage for all function, global, memory, table instances.
+ */
 public class Store {
-    private List<HostFunction> functions;
-    private List<HostGlobal> globals;
-    private List<HostMemory> memories;
-    private List<HostTable> tables;
+    private LinkedHashMap<Store.Key, HostFunction> functions = new LinkedHashMap<>();
+    private LinkedHashMap<Store.Key, HostGlobal> globals = new LinkedHashMap<>();
+    private LinkedHashMap<Store.Key, HostMemory> memories = new LinkedHashMap<>();
+    private LinkedHashMap<Store.Key, HostTable> tables = new LinkedHashMap<>();
 
     public Store() {}
 
-    public Store withFunctions(List<HostFunction> functions) {
-        this.functions = functions;
-        return this;
-    }
-
     public Store addFunction(HostFunction... function) {
-        if (this.functions == null) {
-            this.functions = new ArrayList<>();
+        for (var f : function) {
+            functions.put(new Key(f.moduleName(), f.fieldName()), f);
         }
-        Collections.addAll(this.functions, function);
-        return this;
-    }
-
-    public Store withGlobals(List<HostGlobal> globals) {
-        this.globals = globals;
         return this;
     }
 
     public Store addGlobal(HostGlobal... global) {
-        if (this.globals == null) {
-            this.globals = new ArrayList<>();
+        for (var g : global) {
+            globals.put(new Key(g.moduleName(), g.fieldName()), g);
         }
-        Collections.addAll(this.globals, global);
-        return this;
-    }
-
-    public Store withMemories(List<HostMemory> memories) {
-        this.memories = memories;
         return this;
     }
 
     public Store addMemory(HostMemory... memory) {
-        if (this.memories == null) {
-            this.memories = new ArrayList<>();
+        for (var m : memory) {
+            memories.put(new Key(m.moduleName(), m.fieldName()), m);
         }
-        Collections.addAll(this.memories, memory);
-        return this;
-    }
-
-    public Store withTables(List<HostTable> tables) {
-        this.tables = tables;
         return this;
     }
 
     public Store addTable(HostTable... table) {
-        if (this.tables == null) {
-            this.tables = new ArrayList<>();
+        for (var t : table) {
+            tables.put(new Key(t.moduleName(), t.fieldName()), t);
         }
-        Collections.addAll(this.tables, table);
         return this;
     }
 
@@ -84,27 +54,21 @@ public class Store {
     }
 
     public HostImports toHostImports() {
-        final HostImports hostImports =
-                new HostImports(
-                        functions == null
-                                ? new HostFunction[0]
-                                : functions.toArray(new HostFunction[0]),
-                        globals == null ? new HostGlobal[0] : globals.toArray(new HostGlobal[0]),
-                        memories == null ? new HostMemory[0] : memories.toArray(new HostMemory[0]),
-                        tables == null ? new HostTable[0] : tables.toArray(new HostTable[0]));
-        return hostImports;
+        return new HostImports(
+                functions.values().toArray(new HostFunction[0]),
+                globals.values().toArray(new HostGlobal[0]),
+                memories.values().toArray(new HostMemory[0]),
+                tables.values().toArray(new HostTable[0]));
     }
 
     public Instance instantiate(String name, Module m) {
         HostImports hostImports = toHostImports();
         Instance instance = Instance.builder(m).withHostImports(hostImports).build();
-
         register(name, instance);
-
         return instance;
     }
 
-    public void register(String name, Instance instance) {
+    public Store register(String name, Instance instance) {
         ExportSection exportSection = instance.module().exportSection();
         for (int i = 0; i < exportSection.exportCount(); i++) {
             Export export = exportSection.getExport(i);
@@ -135,6 +99,30 @@ public class Store {
                     this.addGlobal(new HostGlobal(name, exportName, g));
                     break;
             }
+        }
+        return this;
+    }
+
+    private class Key {
+        private final String moduleName;
+        private final String name;
+
+        public Key(String moduleName, String name) {
+            this.moduleName = moduleName;
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Key)) return false;
+            Key key = (Key) o;
+            return Objects.equals(moduleName, key.moduleName) && Objects.equals(name, key.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(moduleName, name);
         }
     }
 }
