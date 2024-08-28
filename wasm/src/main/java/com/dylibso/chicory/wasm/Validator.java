@@ -329,12 +329,6 @@ final class Validator {
             throw new MalformedException("data count and data section have inconsistent lengths");
         }
 
-        List<GlobalImport> importedGlobals =
-                module.importSection().stream()
-                        .filter(i -> i.importType() == ExternalType.GLOBAL)
-                        .map(GlobalImport.class::cast)
-                        .collect(toList());
-
         validateGlobals();
 
 
@@ -343,7 +337,7 @@ final class Validator {
         for (Element el : elements) {
             if (el instanceof ActiveElement) {
                 var ae = (ActiveElement) el;
-                validateConstantExpression(ae.offset(), importedGlobals, ValueType.I32);
+                validateConstantExpression(ae.offset(), ValueType.I32);
             }
         }
 
@@ -352,7 +346,7 @@ final class Validator {
         for (var ds : dataSegments) {
             if (ds instanceof ActiveDataSegment) {
                 var ads = (ActiveDataSegment) ds;
-                validateConstantExpression(ads.offsetInstructions(), importedGlobals, ValueType.I32);
+                validateConstantExpression(ads.offsetInstructions(), ValueType.I32);
             }
         }
 
@@ -374,98 +368,11 @@ final class Validator {
     private void validateGlobals() {
         Global[] globals = module.globalSection().globals();
         for (Global g : globals) {
-            int constInstrCount = 0;
-            List<Instruction> expr = g.initInstructions();
-            for (var instruction : expr) {
-                ValueType exprType = null;
-
-                switch (instruction.opcode()) {
-                    case I32_CONST:
-                        exprType = ValueType.I32;
-                        constInstrCount++;
-                        break;
-                    case I64_CONST:
-                        exprType = ValueType.I64;
-                        constInstrCount++;
-                        break;
-                    case F32_CONST:
-                        exprType = ValueType.F32;
-                        constInstrCount++;
-                        break;
-                    case F64_CONST:
-                        exprType = ValueType.F64;
-                        constInstrCount++;
-                        break;
-                    case REF_NULL:
-                        {
-                            exprType = ValueType.refTypeForId((int) instruction.operands()[0]);
-                            constInstrCount++;
-                            if (exprType != ValueType.ExternRef && exprType != ValueType.FuncRef) {
-                                throw new IllegalStateException(
-                                        "Unexpected wrong type for ref.null instruction");
-                            }
-                            break;
-                        }
-                    case REF_FUNC:
-                        {
-                            exprType = ValueType.FuncRef;
-                            constInstrCount++;
-                            long idx = instruction.operands()[0];
-
-                            if (idx < 0 || idx >= (this.functionImports.size() + module.functionSection().functionCount())) {
-                                throw new InvalidException("unknown function " + idx);
-                            }
-
-                            break;
-                        }
-                    case GLOBAL_GET:
-                        {
-                            var idx = (int) instruction.operands()[0];
-                            if (idx < globalImports.size()) {
-                                var global = globalImports.get(idx);
-                                if (global.mutabilityType() != MutabilityType.Const) {
-                                    throw new InvalidException(
-                                            "constant expression required, initializer expression"
-                                                    + " cannot reference a mutable global");
-                                }
-                                exprType = global.valueType();
-                            } else {
-                                throw new InvalidException(
-                                        "unknown global "
-                                                + idx
-                                                + ", initializer expression can only reference"
-                                                + " an imported global");
-                            }
-                            constInstrCount++;
-                            break;
-                        }
-                    case END:
-                        {
-                            break;
-                        }
-                    default:
-                        {
-                            throw new InvalidException(
-                                    "constant expression required, but non-constant instruction"
-                                            + " encountered: "
-                                            + instruction);
-                        }
-                }
-
-                if (exprType != null && exprType != g.valueType()) {
-                    throw new InvalidException("type mismatch");
-                }
-
-                // There must be at most one constant instruction.
-                if (constInstrCount > 1) {
-                    throw new InvalidException(
-                            "type mismatch, multiple constant expressions found");
-                }
-            }
+            validateConstantExpression(g.initInstructions(), g.valueType());
         }
     }
 
-    private void validateConstantExpression(List<? extends Instruction> expr, List<GlobalImport> importedGlobals, ValueType expectedType) {
+    private void validateConstantExpression(List<? extends Instruction> expr, ValueType expectedType) {
         int constInstrCount = 0;
         for (var instruction : expr) {
             ValueType exprType = null;
@@ -501,19 +408,25 @@ final class Validator {
                 {
                     exprType = ValueType.FuncRef;
                     constInstrCount++;
+                    long idx = instruction.operands()[0];
+
+                    if (idx < 0 || idx >= (this.functionImports.size() + module.functionSection().functionCount())) {
+                        throw new InvalidException("unknown function " + idx);
+                    }
+
                     break;
                 }
                 case GLOBAL_GET:
                 {
                     var idx = (int) instruction.operands()[0];
-                    if (idx < importedGlobals.size()) {
-                        GlobalImport global = importedGlobals.get(idx);
+                    if (idx < globalImports.size()) {
+                        var global = globalImports.get(idx);
                         if (global.mutabilityType() != MutabilityType.Const) {
                             throw new InvalidException(
                                     "constant expression required, initializer expression"
                                             + " cannot reference a mutable global");
                         }
-                        exprType = global.type();
+                        exprType = global.valueType();
                     } else {
                         throw new InvalidException(
                                 "unknown global "
