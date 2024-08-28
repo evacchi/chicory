@@ -16,6 +16,7 @@ import com.dylibso.chicory.wasm.types.FunctionImport;
 import com.dylibso.chicory.wasm.types.FunctionType;
 import com.dylibso.chicory.wasm.types.Global;
 import com.dylibso.chicory.wasm.types.GlobalImport;
+import com.dylibso.chicory.wasm.types.Import;
 import com.dylibso.chicory.wasm.types.Instruction;
 import com.dylibso.chicory.wasm.types.MutabilityType;
 import com.dylibso.chicory.wasm.types.OpCode;
@@ -314,6 +315,13 @@ final class Validator {
     }
 
     public void validateModule() {
+        List<Import> importedGlobals =
+                module.importSection().stream()
+                        .filter(i -> i.importType() == ExternalType.GLOBAL)
+                        .collect(toList());
+
+        int nGlobalImports = importedGlobals.size();
+
         Global[] globals = module.globalSection().globals();
         for (int i = 0; i < globals.length; i++) {
             Global g = globals[i];
@@ -322,7 +330,7 @@ final class Validator {
                 throw new InvalidException("type mismatch");
             }
 
-            var j = i;
+            var j = nGlobalImports + i;
 
             {
                 Instruction inst = init.get(0);
@@ -348,26 +356,58 @@ final class Validator {
             }
 
             // A global constant expression cannot call global.get twice.
-            long globalGetCount = init.stream().filter(inst -> inst.opcode() == OpCode.GLOBAL_GET).count();
-            if (globalGetCount > 1) {
+            long globalConstCount =
+                    init.stream()
+                            .filter(
+                                    inst ->
+                                            inst.opcode() == OpCode.GLOBAL_GET
+                                                    || inst.opcode() == OpCode.I32_CONST)
+                            .count();
+            if (globalConstCount > 1) {
                 throw new InvalidException("type mismatch");
             }
 
-
             // A global constant expression must match types.
-            if (g.initInstructions().stream().filter(inst -> inst.opcode() == OpCode.GLOBAL_GET && inst.operands()[0] < 0  && inst.operands()[0] >= j)
-                    .findFirst().filter(inst -> globals[ (int) inst.operands()[0] ].valueType() == g.valueType() ).isPresent()) {
+            if (g.initInstructions().stream()
+                    .filter(inst -> inst.opcode() == OpCode.GLOBAL_GET)
+                    .findFirst()
+                    .filter(
+                            inst -> {
+                                int idx = (int) inst.operands()[0];
+                                if (idx >= importedGlobals.size()) {
+                                    return false;
+                                }
+                                GlobalImport imp =
+                                        (GlobalImport) module.importSection().getImport(idx);
+                                return imp.type() != g.valueType();
+                            })
+                    .isPresent()) {
                 throw new InvalidException("type mismatch");
+            }
+
+            if (g.initInstructions().stream()
+                    .filter(inst -> inst.opcode() == OpCode.GLOBAL_GET)
+                    .findFirst()
+                    .filter(
+                            inst -> {
+                                int idx = (int) inst.operands()[0];
+                                if (idx >= importedGlobals.size()) {
+                                    return false;
+                                }
+                                GlobalImport imp =
+                                        (GlobalImport) module.importSection().getImport(idx);
+                                return imp.mutabilityType() != MutabilityType.Const;
+                            })
+                    .isPresent()) {
+                throw new InvalidException("constant expression required");
             }
 
             // A global constant expression cannot self-reference itself.
-            if (g.initInstructions().stream().anyMatch(inst -> inst.opcode() == OpCode.GLOBAL_GET && inst.operands()[0] == j)) {
+            if (g.initInstructions().stream()
+                    .anyMatch(
+                            inst -> inst.opcode() == OpCode.GLOBAL_GET && inst.operands()[0] > j)) {
                 throw new InvalidException("unknown global");
             }
-
-
-
-
         }
 
         if (module.functionSection().functionCount() != module.codeSection().functionBodyCount()) {
