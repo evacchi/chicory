@@ -315,6 +315,126 @@ final class Validator {
     }
 
     public void validateModule() {
+        validateGlobals2();
+
+        if (module.functionSection().functionCount() != module.codeSection().functionBodyCount()) {
+            throw new MalformedException("function and code section have inconsistent lengths");
+        }
+
+        if (module.dataCountSection()
+                .map(dcs -> dcs.dataCount() != module.dataSection().dataSegmentCount())
+                .orElse(false)) {
+            throw new MalformedException("data count and data section have inconsistent lengths");
+        }
+
+        if (module.startSection().isPresent()) {
+            long index = module.startSection().get().startIndex();
+            if (index < 0 || index > Integer.MAX_VALUE) {
+                throw new InvalidException("unknown function " + index);
+            }
+            var type = getType(getFunctionType((int) index));
+            if (!type.params().isEmpty() || !type.returns().isEmpty()) {
+                throw new InvalidException(
+                        "invalid start function, must have empty signature " + type);
+            }
+        }
+    }
+
+    private void validateGlobals2() {
+        List<GlobalImport> importedGlobals =
+                module.importSection().stream()
+                        .filter(i -> i.importType() == ExternalType.GLOBAL)
+                        .map(GlobalImport.class::cast)
+                        .collect(toList());
+
+        Global[] globals = module.globalSection().globals();
+        for (Global g : globals) {
+            int constInstrCount = 0;
+            List<Instruction> expr = g.initInstructions();
+            for (var instruction : expr) {
+                ValueType exprType = null;
+
+                switch (instruction.opcode()) {
+                    case I32_CONST:
+                        exprType = ValueType.I32;
+                        constInstrCount++;
+                        break;
+                    case I64_CONST:
+                        exprType = ValueType.I64;
+                        constInstrCount++;
+                        break;
+                    case F32_CONST:
+                        exprType = ValueType.F32;
+                        constInstrCount++;
+                        break;
+                    case F64_CONST:
+                        exprType = ValueType.F64;
+                        constInstrCount++;
+                        break;
+                    case REF_NULL:
+                        {
+                            exprType = ValueType.refTypeForId((int) instruction.operands()[0]);
+                            constInstrCount++;
+                            if (exprType != ValueType.ExternRef && exprType != ValueType.FuncRef) {
+                                throw new IllegalStateException(
+                                        "Unexpected wrong type for ref.null instruction");
+                            }
+                            break;
+                        }
+                    case REF_FUNC:
+                        {
+                            exprType = ValueType.FuncRef;
+                            constInstrCount++;
+                            break;
+                        }
+                    case GLOBAL_GET:
+                        {
+                            var idx = (int) instruction.operands()[0];
+                            if (idx < importedGlobals.size()) {
+                                GlobalImport global = importedGlobals.get(idx);
+                                if (global.mutabilityType() != MutabilityType.Const) {
+                                    throw new InvalidException(
+                                            "constant expression required, initializer expression"
+                                                    + " cannot reference a mutable global");
+                                }
+                                exprType = global.type();
+                            } else {
+                                throw new InvalidException(
+                                        "unknown global "
+                                                + idx
+                                                + ", initializer expression can only reference"
+                                                + " an imported global");
+                            }
+                            constInstrCount++;
+                            break;
+                        }
+                    case END:
+                        {
+                            break;
+                        }
+                    default:
+                        {
+                            throw new InvalidException(
+                                    "constant expression required, but non-constant instruction"
+                                            + " encountered: "
+                                            + instruction);
+                        }
+                }
+
+                if (exprType != null && exprType != g.valueType()) {
+                    throw new InvalidException("type mismatch");
+                }
+
+                // There must be at most one constant instruction.
+                if (constInstrCount > 1) {
+                    throw new InvalidException(
+                            "type mismatch, multiple constant expressions found");
+                }
+            }
+        }
+    }
+
+    private void validateGlobals() {
         List<Import> importedGlobals =
                 module.importSection().stream()
                         .filter(i -> i.importType() == ExternalType.GLOBAL)
@@ -407,28 +527,6 @@ final class Validator {
                     .anyMatch(
                             inst -> inst.opcode() == OpCode.GLOBAL_GET && inst.operands()[0] > j)) {
                 throw new InvalidException("unknown global");
-            }
-        }
-
-        if (module.functionSection().functionCount() != module.codeSection().functionBodyCount()) {
-            throw new MalformedException("function and code section have inconsistent lengths");
-        }
-
-        if (module.dataCountSection()
-                .map(dcs -> dcs.dataCount() != module.dataSection().dataSegmentCount())
-                .orElse(false)) {
-            throw new MalformedException("data count and data section have inconsistent lengths");
-        }
-
-        if (module.startSection().isPresent()) {
-            long index = module.startSection().get().startIndex();
-            if (index < 0 || index > Integer.MAX_VALUE) {
-                throw new InvalidException("unknown function " + index);
-            }
-            var type = getType(getFunctionType((int) index));
-            if (!type.params().isEmpty() || !type.returns().isEmpty()) {
-                throw new InvalidException(
-                        "invalid start function, must have empty signature " + type);
             }
         }
     }
