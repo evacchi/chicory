@@ -11,10 +11,10 @@ import java.util.Objects;
  * The runtime storage for all function, global, memory, table instances.
  */
 public class Store {
-    private LinkedHashMap<Store.Key, HostFunction> functions = new LinkedHashMap<>();
-    private LinkedHashMap<Store.Key, HostGlobal> globals = new LinkedHashMap<>();
-    private LinkedHashMap<Store.Key, HostMemory> memories = new LinkedHashMap<>();
-    private LinkedHashMap<Store.Key, HostTable> tables = new LinkedHashMap<>();
+    private final LinkedHashMap<Store.Key, HostFunction> functions = new LinkedHashMap<>();
+    private final LinkedHashMap<Store.Key, HostGlobal> globals = new LinkedHashMap<>();
+    private final LinkedHashMap<Store.Key, HostMemory> memories = new LinkedHashMap<>();
+    private final LinkedHashMap<Store.Key, HostTable> tables = new LinkedHashMap<>();
 
     public Store() {}
 
