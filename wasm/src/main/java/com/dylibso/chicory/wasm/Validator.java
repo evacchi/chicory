@@ -7,6 +7,8 @@ import static java.util.stream.Collectors.toSet;
 
 import com.dylibso.chicory.wasm.exceptions.InvalidException;
 import com.dylibso.chicory.wasm.exceptions.MalformedException;
+import com.dylibso.chicory.wasm.types.ActiveDataSegment;
+import com.dylibso.chicory.wasm.types.ActiveElement;
 import com.dylibso.chicory.wasm.types.AnnotatedInstruction;
 import com.dylibso.chicory.wasm.types.DeclarativeElement;
 import com.dylibso.chicory.wasm.types.Element;
@@ -27,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // Heavily inspired by wazero
@@ -315,7 +318,6 @@ final class Validator {
     }
 
     public void validateModule() {
-        validateGlobals();
 
         if (module.functionSection().functionCount() != module.codeSection().functionBodyCount()) {
             throw new MalformedException("function and code section have inconsistent lengths");
@@ -325,6 +327,33 @@ final class Validator {
                 .map(dcs -> dcs.dataCount() != module.dataSection().dataSegmentCount())
                 .orElse(false)) {
             throw new MalformedException("data count and data section have inconsistent lengths");
+        }
+
+        List<GlobalImport> importedGlobals =
+                module.importSection().stream()
+                        .filter(i -> i.importType() == ExternalType.GLOBAL)
+                        .map(GlobalImport.class::cast)
+                        .collect(toList());
+
+        validateGlobals();
+
+
+        // Validate offsets.
+        var elements = module.elementSection().elements();
+        for (Element el : elements) {
+            if (el instanceof ActiveElement) {
+                var ae = (ActiveElement) el;
+                validateConstantExpression(ae.offset(), importedGlobals, ValueType.I32);
+            }
+        }
+
+        // Validate offsets.
+        var dataSegments = module.dataSection().dataSegments();
+        for (var ds : dataSegments) {
+            if (ds instanceof ActiveDataSegment) {
+                var ads = (ActiveDataSegment) ds;
+                validateConstantExpression(ads.offsetInstructions(), importedGlobals, ValueType.I32);
+            }
         }
 
         if (module.startSection().isPresent()) {
@@ -338,15 +367,11 @@ final class Validator {
                         "invalid start function, must have empty signature " + type);
             }
         }
+
+
     }
 
     private void validateGlobals() {
-        List<GlobalImport> importedGlobals =
-                module.importSection().stream()
-                        .filter(i -> i.importType() == ExternalType.GLOBAL)
-                        .map(GlobalImport.class::cast)
-                        .collect(toList());
-
         Global[] globals = module.globalSection().globals();
         for (Global g : globals) {
             int constInstrCount = 0;
@@ -385,19 +410,25 @@ final class Validator {
                         {
                             exprType = ValueType.FuncRef;
                             constInstrCount++;
+                            long idx = instruction.operands()[0];
+
+                            if (idx < 0 || idx >= (this.functionImports.size() + module.functionSection().functionCount())) {
+                                throw new InvalidException("unknown function " + idx);
+                            }
+
                             break;
                         }
                     case GLOBAL_GET:
                         {
                             var idx = (int) instruction.operands()[0];
-                            if (idx < importedGlobals.size()) {
-                                GlobalImport global = importedGlobals.get(idx);
+                            if (idx < globalImports.size()) {
+                                var global = globalImports.get(idx);
                                 if (global.mutabilityType() != MutabilityType.Const) {
                                     throw new InvalidException(
                                             "constant expression required, initializer expression"
                                                     + " cannot reference a mutable global");
                                 }
-                                exprType = global.type();
+                                exprType = global.valueType();
                             } else {
                                 throw new InvalidException(
                                         "unknown global "
@@ -430,6 +461,90 @@ final class Validator {
                     throw new InvalidException(
                             "type mismatch, multiple constant expressions found");
                 }
+            }
+        }
+    }
+
+    private void validateConstantExpression(List<? extends Instruction> expr, List<GlobalImport> importedGlobals, ValueType expectedType) {
+        int constInstrCount = 0;
+        for (var instruction : expr) {
+            ValueType exprType = null;
+
+            switch (instruction.opcode()) {
+                case I32_CONST:
+                    exprType = ValueType.I32;
+                    constInstrCount++;
+                    break;
+                case I64_CONST:
+                    exprType = ValueType.I64;
+                    constInstrCount++;
+                    break;
+                case F32_CONST:
+                    exprType = ValueType.F32;
+                    constInstrCount++;
+                    break;
+                case F64_CONST:
+                    exprType = ValueType.F64;
+                    constInstrCount++;
+                    break;
+                case REF_NULL:
+                {
+                    exprType = ValueType.refTypeForId((int) instruction.operands()[0]);
+                    constInstrCount++;
+                    if (exprType != ValueType.ExternRef && exprType != ValueType.FuncRef) {
+                        throw new IllegalStateException(
+                                "Unexpected wrong type for ref.null instruction");
+                    }
+                    break;
+                }
+                case REF_FUNC:
+                {
+                    exprType = ValueType.FuncRef;
+                    constInstrCount++;
+                    break;
+                }
+                case GLOBAL_GET:
+                {
+                    var idx = (int) instruction.operands()[0];
+                    if (idx < importedGlobals.size()) {
+                        GlobalImport global = importedGlobals.get(idx);
+                        if (global.mutabilityType() != MutabilityType.Const) {
+                            throw new InvalidException(
+                                    "constant expression required, initializer expression"
+                                            + " cannot reference a mutable global");
+                        }
+                        exprType = global.type();
+                    } else {
+                        throw new InvalidException(
+                                "unknown global "
+                                        + idx
+                                        + ", initializer expression can only reference"
+                                        + " an imported global");
+                    }
+                    constInstrCount++;
+                    break;
+                }
+                case END:
+                {
+                    break;
+                }
+                default:
+                {
+                    throw new InvalidException(
+                            "constant expression required, but non-constant instruction"
+                                    + " encountered: "
+                                    + instruction);
+                }
+            }
+
+            if (exprType != null && exprType != expectedType) {
+                throw new InvalidException("type mismatch");
+            }
+
+            // There must be at most one constant instruction.
+            if (constInstrCount > 1) {
+                throw new InvalidException(
+                        "type mismatch, multiple constant expressions found");
             }
         }
     }
