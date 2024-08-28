@@ -11,9 +11,6 @@ import java.io.File;
 public class TestModule {
 
     private Module module;
-    private Instance instance;
-
-    private HostImports imports;
 
     public static TestModule of(Module module) {
         return new TestModule(module);
@@ -62,22 +59,8 @@ public class TestModule {
         this.module = module;
     }
 
-    public Instance build() {
-        this.instance = Instance.builder(module).withHostImports(imports).build();
-        return this.instance;
-    }
-
-    public Instance instantiate(Store s, String name) {
-        return s.instantiate(name, module);
-    }
-
     public Instance instantiate(Store s) {
         HostImports hostImports = s.toHostImports();
         return Instance.builder(module).withHostImports(hostImports).build();
-    }
-
-    public TestModule withHostImports(HostImports imports) {
-        this.imports = imports;
-        return this;
     }
 }

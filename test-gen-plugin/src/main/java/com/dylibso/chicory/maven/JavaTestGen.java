@@ -424,7 +424,8 @@ public class JavaTestGen {
                         + wasmFile
                         + "\"))\n"
                         + ((excludeInvalid) ? INDENT + ".withTypeValidation(false)\n" : "")
-                        + INDENT + ".instantiate(store)");
+                        + INDENT
+                        + ".instantiate(store)");
     }
 
     private static NameExpr generateRegisterInstance(Command cmd, String name, String instance) {
