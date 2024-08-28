@@ -327,27 +327,6 @@ final class Validator {
             throw new MalformedException("data count and data section have inconsistent lengths");
         }
 
-        // Validate globals
-        for (Global g : module.globalSection().globals()) {
-            validateConstantExpression(g.initInstructions(), g.valueType());
-        }
-
-        // Validate offsets.
-        for (Element el : module.elementSection().elements()) {
-            if (el instanceof ActiveElement) {
-                var ae = (ActiveElement) el;
-                validateConstantExpression(ae.offset(), ValueType.I32);
-            }
-        }
-
-        // Validate offsets.
-        for (var ds : module.dataSection().dataSegments()) {
-            if (ds instanceof ActiveDataSegment) {
-                var ads = (ActiveDataSegment) ds;
-                validateConstantExpression(ads.offsetInstructions(), ValueType.I32);
-            }
-        }
-
         if (module.startSection().isPresent()) {
             long index = module.startSection().get().startIndex();
             if (index < 0 || index > Integer.MAX_VALUE) {
@@ -358,6 +337,32 @@ final class Validator {
                 throw new InvalidException(
                         "invalid start function, must have empty signature " + type);
             }
+        }
+    }
+
+    public void validateData() {
+        // Validate offsets.
+        for (var ds : module.dataSection().dataSegments()) {
+            if (ds instanceof ActiveDataSegment) {
+                var ads = (ActiveDataSegment) ds;
+                validateConstantExpression(ads.offsetInstructions(), ValueType.I32);
+            }
+        }
+    }
+
+    public void validateElements() {
+        // Validate offsets.
+        for (Element el : module.elementSection().elements()) {
+            if (el instanceof ActiveElement) {
+                var ae = (ActiveElement) el;
+                validateConstantExpression(ae.offset(), ValueType.I32);
+            }
+        }
+    }
+
+    public void validateGlobals() {
+        for (Global g : module.globalSection().globals()) {
+            validateConstantExpression(g.initInstructions(), g.valueType());
         }
     }
 

@@ -256,6 +256,9 @@ public class Module {
             validator.validateModule();
             if (validate) {
                 validator.validateFunctions();
+                validator.validateGlobals();
+                validator.validateElements();
+                validator.validateData();
             }
 
             return module;
